@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, signal, computed, input, output } from '@angular/core';
+import { Component, signal, computed, input, output, effect } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MarkdownComponent } from 'ngx-markdown';
 import { marked } from 'marked';
 
 interface Note {
@@ -17,7 +18,7 @@ interface Note {
 
 @Component({
   selector: 'app-main-editor',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MarkdownComponent],
   templateUrl: './main-editor.html',
   styleUrl: './main-editor.scss',
 })
@@ -36,6 +37,9 @@ export class MainEditor {
   editingLineIndex = signal<number | null>(null);
   lineRenderModes = signal<{ [lineIndex: number]: 'edit' | 'rendered' }>({});
   
+  // Code block state
+  codeBlockRanges = signal<{ start: number; end: number; language?: string }[]>([]);
+  
   // Backlink autocomplete state
   showBacklinkSuggestions = signal(false);
   backlinkSuggestions = signal<Note[]>([]);
@@ -53,22 +57,89 @@ export class MainEditor {
       breaks: true,
       gfm: true,
     });
+    
+    // Update code block ranges when selected note changes
+    effect(() => {
+      const selected = this.selectedNote();
+      if (selected) {
+        this.updateCodeBlockRanges();
+      }
+    });
   }
 
   // Computed properties
-  markdownPreview = computed(() => {
+  
+  // Get rendered items (combining code blocks and individual lines)
+  getRenderedItems = computed(() => {
     const selected = this.selectedNote();
-    if (!selected) return this.sanitizer.bypassSecurityTrustHtml('');
+    if (!selected) return [];
 
-    try {
-      const html = marked.parse(selected.content, { async: false }) as string;
-      return this.sanitizer.bypassSecurityTrustHtml(html);
-    } catch (error) {
-      console.error('Markdown parsing error:', error);
-      return this.sanitizer.bypassSecurityTrustHtml(
-        '<p>Error parsing markdown</p>',
-      );
-    }
+    const ranges = this.codeBlockRanges();
+    const editingIndex = this.editingLineIndex();
+    const focusedIndex = this.focusedLineIndex();
+    
+    const items: any[] = [];
+    let skipUntil = -1;
+
+    selected.lines.forEach((line, index) => {
+      // Skip lines that are part of already processed code blocks
+      if (index <= skipUntil) return;
+
+      // Check if this line starts a code block
+      const codeBlockRange = ranges.find(range => range.start === index);
+      
+      if (codeBlockRange) {
+        // Check if any line in the code block is being edited
+        let isEditing = false;
+        for (let i = codeBlockRange.start; i <= codeBlockRange.end; i++) {
+          if (editingIndex === i || focusedIndex === i) {
+            isEditing = true;
+            break;
+          }
+        }
+
+        if (isEditing) {
+          // Show individual lines when editing
+          for (let i = codeBlockRange.start; i <= codeBlockRange.end; i++) {
+            items.push({
+              id: `line-${i}`,
+              type: 'line',
+              index: i,
+              content: selected.lines[i],
+              shouldRender: false
+            });
+          }
+        } else {
+          // Show as single code block
+          const codeBlockContent = this.renderCompleteCodeBlock(codeBlockRange);
+          items.push({
+            id: `codeblock-${codeBlockRange.start}-${codeBlockRange.end}`,
+            type: 'codeblock',
+            startIndex: codeBlockRange.start,
+            endIndex: codeBlockRange.end,
+            content: codeBlockContent
+          });
+        }
+        
+        skipUntil = codeBlockRange.end;
+      } else {
+        // Regular line processing
+        const shouldRender = this.shouldRenderLine()(index);
+        const content = shouldRender ? this.renderLineMarkdown(line, index) : line;
+        
+        items.push({
+          id: `line-${index}`,
+          type: 'line',
+          index: index,
+          content: content,
+          shouldRender: shouldRender
+        });
+      }
+    });
+    
+    console.log('🔧 Final items:', items);
+    console.log('🔧 Items count:', items.length);
+    return items;
   });
 
   // Check if a line should be rendered as markdown
@@ -86,7 +157,22 @@ export class MainEditor {
       if (!selected || !selected.lines[lineIndex]) return false;
 
       const line = selected.lines[lineIndex];
-      return this.hasMarkdownContent(line);
+      const codeBlockInfo = this.isLineInCodeBlock(lineIndex);
+      
+      // If line is in a code block, only render if we're not editing any line in that block
+      if (codeBlockInfo.inBlock && codeBlockInfo.range) {
+        // Check if any line in the code block is being edited
+        for (let i = codeBlockInfo.range.start; i <= codeBlockInfo.range.end; i++) {
+          if (editingIndex === i || focusedIndex === i) {
+            return false; // Show all lines as editable if any line in the block is being edited
+          }
+        }
+        // Only render the opening line of the code block, hide the rest
+        return lineIndex === codeBlockInfo.range.start;
+      }
+
+      // Only check for markdown content if not in a code block
+      return this.hasMarkdownContent(line, lineIndex);
     };
   });
 
@@ -96,11 +182,25 @@ export class MainEditor {
   }
 
   // Individual line markdown rendering
-  renderLineMarkdown(line: string): SafeHtml {
+  renderLineMarkdown(line: string, lineIndex: number): SafeHtml {
     if (!line.trim()) {
       return this.sanitizer.bypassSecurityTrustHtml(
         '<div class="empty-line">&nbsp;</div>',
       );
+    }
+
+    const codeBlockInfo = this.isLineInCodeBlock(lineIndex);
+    
+    // If this line is part of a code block, render the entire code block
+    if (codeBlockInfo.inBlock && codeBlockInfo.range) {
+      return this.renderCodeBlock(codeBlockInfo.range, lineIndex);
+    }
+
+    // Only process other markdown types if NOT in a code block
+    // Check if this is a checkbox line
+    const lineMetadata = this.getLineMetadata(line);
+    if (lineMetadata.type === 'checkbox') {
+      return this.renderCheckboxLine(line, lineIndex, lineMetadata.checked || false);
     }
 
     try {
@@ -115,6 +215,117 @@ export class MainEditor {
       console.error('Line markdown parsing error:', error);
       return this.sanitizer.bypassSecurityTrustHtml(line);
     }
+  }
+
+  // Render a checkbox line with custom styling
+  private renderCheckboxLine(line: string, lineIndex: number, isChecked: boolean): SafeHtml {
+    const trimmed = line.trim();
+    // Extract the text after the checkbox
+    const textMatch = trimmed.match(/^-\s*\[[x\s]\]\s+(.*)$/);
+    const text = textMatch ? textMatch[1] : '';
+    
+    // Process backlinks in the text
+    const processedText = this.processBacklinks(text);
+    
+    // Create checkbox HTML
+    const checkboxIcon = isChecked ? '☑' : '☐';
+    const textClass = isChecked ? 'checkbox-text completed' : 'checkbox-text';
+    
+    const html = `
+      <div class="checkbox-line">
+        <span class="checkbox-icon" data-line-index="${lineIndex}">${checkboxIcon}</span>
+        <span class="${textClass}">${processedText}</span>
+      </div>
+    `;
+    
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  // Render a complete code block
+  private renderCodeBlock(range: { start: number; end: number; language?: string }, currentLineIndex: number): SafeHtml {
+    const selected = this.selectedNote();
+    if (!selected || currentLineIndex !== range.start) {
+      // Only render the code block on the first line, return empty for other lines
+      return this.sanitizer.bypassSecurityTrustHtml('');
+    }
+
+    // Get the entire code block including the backticks
+    const allLines = selected.lines.slice(range.start, range.end + 1);
+    const codeBlockContent = allLines.join('\n');
+    
+    // Use marked to parse the complete code block
+    try {
+      const html = marked.parse(codeBlockContent, { async: false }) as string;
+      return this.sanitizer.bypassSecurityTrustHtml(html);
+    } catch (error) {
+      console.error('Code block rendering error:', error);
+      // Fallback to manual rendering
+      const codeLines = selected.lines.slice(range.start + 1, range.end);
+      const codeContent = codeLines.join('\n');
+      const language = range.language || '';
+      const safeContent = this.escapeHtml(codeContent);
+      const languageClass = language ? ` class="language-${language}"` : '';
+      
+      const fallbackHtml = `
+        <pre>
+          <code${languageClass}>${safeContent}</code>
+        </pre>
+      `;
+      return this.sanitizer.bypassSecurityTrustHtml(fallbackHtml);
+    }
+  }
+
+  // Render a complete code block as a single HTML element
+  private renderCompleteCodeBlock(range: { start: number; end: number; language?: string }): SafeHtml {
+    const selected = this.selectedNote();
+    if (!selected) return this.sanitizer.bypassSecurityTrustHtml('');
+
+    // Get just the code content (excluding the ``` lines)
+    const codeLines = selected.lines.slice(range.start + 1, range.end);
+    const codeContent = codeLines.join('\n');
+    const language = range.language || '';
+    const safeContent = this.escapeHtml(codeContent);
+    
+    // Create HTML structure manually to ensure it works
+    const languageClass = language ? ` class="language-${language}"` : '';
+    const html = `
+      <pre><code${languageClass}>${safeContent}</code></pre>
+    `;
+    
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  // Handle clicking on a code block
+  handleCodeBlockClick(startIndex: number, event?: MouseEvent) {
+    // Don't interfere with text selection
+    const selection = window.getSelection();
+    if (event && (event.detail > 1 || (selection && !selection.isCollapsed))) {
+      return;
+    }
+
+    // Focus the first content line of the code block (not the ``` line)
+    const targetLineIndex = startIndex + 1;
+    
+    setTimeout(() => {
+      const currentSelection = window.getSelection();
+      if (currentSelection && currentSelection.isCollapsed) {
+        this.editingLineIndex.set(targetLineIndex);
+        this.focusedLineIndex.set(targetLineIndex);
+        setTimeout(() => {
+          this.focusLine(targetLineIndex, 0);
+        }, 0);
+      }
+    }, 10);
+  }
+
+  // Escape HTML entities
+  private escapeHtml(content: string): string {
+    return content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // Process backlinks [[Note Title]] and convert to clickable elements
@@ -136,8 +347,18 @@ export class MainEditor {
   }
 
   // Detect if a line contains markdown syntax
-  private hasMarkdownContent(line: string): boolean {
+  private hasMarkdownContent(line: string, lineIndex?: number): boolean {
     if (!line.trim()) return false;
+
+    // If we have a line index, check if it's inside a code block
+    if (lineIndex !== undefined) {
+      const codeBlockInfo = this.isLineInCodeBlock(lineIndex);
+      if (codeBlockInfo.inBlock) {
+        // Lines inside code blocks should not be processed as markdown
+        // Only the opening ``` line should be detected as markdown
+        return line.trim().startsWith('```');
+      }
+    }
 
     // Check for common markdown patterns
     const markdownPatterns = [
@@ -145,15 +366,135 @@ export class MainEditor {
       /\*\*.*\*\*/, // Bold
       /\*.*\*/, // Italic
       /`.*`/, // Inline code
-      /^\s*[-*+]\s+/, // Lists
+      /^\s*[-*+]\s+(?!\[)/, // Lists (but not checkboxes)
       /^\s*\d+\.\s+/, // Numbered lists
       /^\s*>\s+/, // Blockquotes
       /\[.*\]\(.*\)/, // Links
-      /^```/, // Code blocks
+      /^```/, // Code block start/end
       /\[\[.*\]\]/, // Backlinks [[Note Title]]
+      /^\s*-\s*\[[x\s]\]\s+/, // Checkboxes
     ];
 
     return markdownPatterns.some((pattern) => pattern.test(line));
+  }
+
+  // Get line type and metadata for styling
+  getLineMetadata(line: string): { type: string; indent: number; listNumber?: string; checked?: boolean } {
+    const trimmed = line.trim();
+    const leadingSpaces = line.length - line.trimStart().length;
+    const indent = Math.floor(leadingSpaces / 2); // Assuming 2 spaces per indent level
+
+    // Check for checkboxes first (more specific than regular lists)
+    const checkboxMatch = trimmed.match(/^-\s*\[([x\s])\]\s+/);
+    if (checkboxMatch) {
+      const isChecked = checkboxMatch[1].toLowerCase() === 'x';
+      return { type: 'checkbox', indent, checked: isChecked };
+    }
+
+    // Check for unordered list (but not checkboxes)
+    const unorderedListMatch = trimmed.match(/^[-*+]\s+(?!\[)/);
+    if (unorderedListMatch) {
+      return { type: 'unordered-list', indent };
+    }
+
+    // Check for ordered list
+    const orderedListMatch = trimmed.match(/^(\d+)\.\s/);
+    if (orderedListMatch) {
+      return { type: 'ordered-list', indent, listNumber: orderedListMatch[1] };
+    }
+
+    // Check for headers
+    const headerMatch = trimmed.match(/^(#{1,6})\s/);
+    if (headerMatch) {
+      return { type: `header-${headerMatch[1].length}`, indent };
+    }
+
+    // Check for blockquotes
+    if (trimmed.match(/^>\s/)) {
+      return { type: 'blockquote', indent };
+    }
+
+    return { type: 'text', indent };
+  }
+
+  // Detect and update code block ranges
+  private updateCodeBlockRanges() {
+    const selected = this.selectedNote();
+    if (!selected) {
+      this.codeBlockRanges.set([]);
+      return;
+    }
+
+    const ranges: { start: number; end: number; language?: string }[] = [];
+    let inCodeBlock = false;
+    let currentStart = -1;
+    let currentLanguage: string | undefined;
+
+    selected.lines.forEach((line, index) => {
+      const trimmed = line.trim();
+      
+      if (trimmed.startsWith('```')) {
+        if (!inCodeBlock) {
+          // Starting a code block
+          inCodeBlock = true;
+          currentStart = index;
+          currentLanguage = trimmed.substring(3).trim() || undefined;
+        } else {
+          // Ending a code block
+          inCodeBlock = false;
+          if (currentStart !== -1) {
+            ranges.push({
+              start: currentStart,
+              end: index,
+              language: currentLanguage
+            });
+          }
+          currentStart = -1;
+          currentLanguage = undefined;
+        }
+      }
+    });
+
+    // Handle unclosed code blocks
+    if (inCodeBlock && currentStart !== -1) {
+      ranges.push({
+        start: currentStart,
+        end: selected.lines.length - 1,
+        language: currentLanguage
+      });
+    }
+    this.codeBlockRanges.set(ranges);
+  }
+
+  // Check if a line is inside a code block
+  isLineInCodeBlock(lineIndex: number): { inBlock: boolean; range?: { start: number; end: number; language?: string } } {
+    const ranges = this.codeBlockRanges();
+    for (const range of ranges) {
+      if (lineIndex >= range.start && lineIndex <= range.end) {
+        return { inBlock: true, range };
+      }
+    }
+    return { inBlock: false };
+  }
+
+  // Check if a line should be hidden (part of a code block rendered elsewhere)
+  shouldHideLine(lineIndex: number): boolean {
+    const editingIndex = this.editingLineIndex();
+    const focusedIndex = this.focusedLineIndex();
+    const codeBlockInfo = this.isLineInCodeBlock(lineIndex);
+    
+    if (codeBlockInfo.inBlock && codeBlockInfo.range) {
+      // Check if any line in the code block is being edited
+      for (let i = codeBlockInfo.range.start; i <= codeBlockInfo.range.end; i++) {
+        if (editingIndex === i || focusedIndex === i) {
+          return false; // Show all lines when editing
+        }
+      }
+      // Hide ALL lines except the opening line when not editing
+      // The opening line will render the entire code block
+      return lineIndex !== codeBlockInfo.range.start;
+    }
+    return false;
   }
   
   // Get all unique tags from all notes for autocomplete
@@ -178,6 +519,9 @@ export class MainEditor {
       contentPreview.substring(0, 50) +
       (contentPreview.length > 50 ? '...' : '');
     selected.lastModified = new Date();
+
+    // Update code block ranges when content changes
+    this.updateCodeBlockRanges();
 
     this.noteUpdated.emit(selected);
   }
@@ -457,6 +801,43 @@ export class MainEditor {
     this.focusedLineIndex.set(lineIndex);
   }
 
+  // Handle clicking on editable lines
+  handleEditableLineClick(lineIndex: number, event: MouseEvent) {
+    // Don't interfere with text selection or double-clicks
+    const selection = window.getSelection();
+    if (event.detail === 2 || (selection && !selection.isCollapsed)) {
+      return;
+    }
+    
+    // Only handle single clicks when there's no text selection
+    if (event.detail === 1) {
+      // Check if we're switching from a different line or not in edit mode
+      const currentEditingLine = this.editingLineIndex();
+      const wasEditingDifferentLine = currentEditingLine !== null && currentEditingLine !== lineIndex;
+      
+      if (wasEditingDifferentLine) {
+        // Small delay to allow selection to complete if user is selecting text
+        setTimeout(() => {
+          const currentSelection = window.getSelection();
+          if (currentSelection && currentSelection.isCollapsed) {
+            // No selection, proceed with line switching
+            this.editingLineIndex.set(lineIndex);
+            this.focusedLineIndex.set(lineIndex);
+            
+            const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+            if (range && range.startContainer.nodeType === Node.TEXT_NODE) {
+              const cursorPosition = range.startOffset;
+              setTimeout(() => {
+                this.focusLine(lineIndex, cursorPosition);
+              }, 0);
+            }
+          }
+        }, 10);
+      }
+      // If we're already editing this line, let the browser handle cursor positioning naturally
+    }
+  }
+
   // Handle line blur for live markdown rendering
   handleLineBlur(lineIndex: number) {
     // Small delay to allow for immediate refocus if needed
@@ -470,6 +851,12 @@ export class MainEditor {
 
   // Handle clicking on rendered markdown to edit
   handleRenderedLineClick(lineIndex: number, event?: MouseEvent) {
+    // Check if the click was on a checkbox
+    if (event && (event.target as HTMLElement).classList.contains('checkbox-icon')) {
+      this.toggleCheckbox(lineIndex);
+      return;
+    }
+
     // Check if the click was on a backlink
     if (event && (event.target as HTMLElement).classList.contains('backlink')) {
       const noteTitle = (event.target as HTMLElement).getAttribute(
@@ -481,10 +868,98 @@ export class MainEditor {
       }
     }
 
-    this.editingLineIndex.set(lineIndex);
+    // Don't interfere with text selection or double-clicks
+    const selection = window.getSelection();
+    if (event && (event.detail > 1 || (selection && !selection.isCollapsed))) {
+      return;
+    }
+
+    // Check if this is a code block - if so, focus the first line of the code block
+    const codeBlockInfo = this.isLineInCodeBlock(lineIndex);
+    const targetLineIndex = codeBlockInfo.inBlock && codeBlockInfo.range 
+      ? codeBlockInfo.range.start + 1  // Focus the first content line, not the ``` line
+      : lineIndex;
+
+    // Small delay to allow selection to complete if user is selecting text
     setTimeout(() => {
-      this.focusLine(lineIndex);
-    }, 0);
+      const currentSelection = window.getSelection();
+      if (currentSelection && currentSelection.isCollapsed) {
+        // No selection, proceed with switching to edit mode
+        let cursorPosition = 0;
+        if (event && !codeBlockInfo.inBlock) {
+          cursorPosition = this.calculateCursorPositionFromClick(event, lineIndex);
+        }
+
+        this.editingLineIndex.set(targetLineIndex);
+        this.focusedLineIndex.set(targetLineIndex);
+        setTimeout(() => {
+          this.focusLine(targetLineIndex, cursorPosition);
+        }, 0);
+      }
+    }, 10);
+  }
+
+  // Toggle checkbox state
+  toggleCheckbox(lineIndex: number) {
+    const selected = this.selectedNote();
+    if (!selected || !selected.lines[lineIndex]) return;
+
+    const line = selected.lines[lineIndex];
+    const trimmed = line.trim();
+    
+    // Check if it's a checkbox line
+    const checkboxMatch = trimmed.match(/^(\s*-\s*)\[([x\s])\](\s+.*)$/);
+    if (checkboxMatch) {
+      const prefix = checkboxMatch[1];
+      const currentState = checkboxMatch[2];
+      const suffix = checkboxMatch[3];
+      
+      // Toggle the state
+      const newState = currentState.toLowerCase() === 'x' ? ' ' : 'x';
+      const newLine = line.replace(/^(\s*-\s*)\[([x\s])\]/, `${prefix}[${newState}]`);
+      
+      selected.lines[lineIndex] = newLine;
+      this.updateNote();
+    }
+  }
+
+  // Calculate cursor position from click coordinates
+  private calculateCursorPositionFromClick(event: MouseEvent, lineIndex: number): number {
+    const selected = this.selectedNote();
+    if (!selected) return 0;
+
+    const plainText = selected.lines[lineIndex];
+    const clickX = event.clientX;
+    const targetElement = event.target as HTMLElement;
+    
+    // Create a temporary element to measure text widths
+    const tempElement = document.createElement('div');
+    tempElement.style.position = 'absolute';
+    tempElement.style.visibility = 'hidden';
+    tempElement.style.whiteSpace = 'pre';
+    tempElement.style.font = window.getComputedStyle(targetElement).font;
+    document.body.appendChild(tempElement);
+
+    const elementRect = targetElement.getBoundingClientRect();
+    const relativeX = clickX - elementRect.left;
+
+    let bestPosition = 0;
+    let bestDistance = Infinity;
+
+    // Test each possible cursor position
+    for (let i = 0; i <= plainText.length; i++) {
+      tempElement.textContent = plainText.substring(0, i);
+      const width = tempElement.offsetWidth;
+      const distance = Math.abs(width - relativeX);
+      
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestPosition = i;
+      }
+    }
+
+    document.body.removeChild(tempElement);
+    return bestPosition;
   }
 
   // Handle backlink navigation
