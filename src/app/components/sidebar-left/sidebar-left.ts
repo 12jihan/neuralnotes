@@ -18,6 +18,7 @@ interface Note {
   preview: string;
   lastModified: Date;
   folderId?: string;
+  tags: string[];
 }
 
 @Component({

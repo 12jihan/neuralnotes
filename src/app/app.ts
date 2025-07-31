@@ -24,6 +24,7 @@ interface Note {
   preview: string;
   lastModified: Date;
   folderId?: string; // Optional folder assignment
+  tags: string[]; // Tags for categorization
 }
 
 interface ChatMessage {
@@ -116,6 +117,7 @@ export class App {
       preview: 'This is your first note! You can use markdown to format...',
       lastModified: new Date(),
       folderId: 'personal',
+      tags: ['welcome', 'tutorial'],
     },
     {
       id: '2',
@@ -140,6 +142,7 @@ export class App {
       preview: "Meeting Notes - Today's Agenda: Discussed project timeline",
       lastModified: new Date(Date.now() - 86400000), // Yesterday
       folderId: 'work',
+      tags: ['meeting', 'work', 'agenda'],
     },
   ]);
 
@@ -181,6 +184,7 @@ export class App {
       lines: [''],
       preview: '',
       lastModified: new Date(),
+      tags: [],
     };
 
     this.notes.update((notes) => [newNote, ...notes]);

@@ -12,6 +12,7 @@ interface Note {
   preview: string;
   lastModified: Date;
   folderId?: string;
+  tags: string[];
 }
 
 @Component({
@@ -40,6 +41,11 @@ export class MainEditor {
   backlinkSuggestions = signal<Note[]>([]);
   backlinkQuery = signal('');
   currentLineForSuggestions = signal<number | null>(null);
+  
+  // Tag management state
+  newTagInput = signal('');
+  showTagSuggestions = signal(false);
+  tagSuggestions = signal<string[]>([]);
 
   constructor(private sanitizer: DomSanitizer) {
     // Configure marked options
@@ -149,6 +155,15 @@ export class MainEditor {
 
     return markdownPatterns.some((pattern) => pattern.test(line));
   }
+  
+  // Get all unique tags from all notes for autocomplete
+  private getAllTags = computed(() => {
+    const allTags = new Set<string>();
+    this.allNotes().forEach(note => {
+      note.tags.forEach(tag => allTags.add(tag));
+    });
+    return Array.from(allTags).sort();
+  });
 
   updateNote() {
     const selected = this.selectedNote();
@@ -495,8 +510,106 @@ export class MainEditor {
       lines: [''],
       preview: '',
       lastModified: new Date(),
+      tags: [],
     };
 
     this.noteUpdated.emit(newNote);
+  }
+  
+  // Tag management methods
+  addTag(tag: string): void {
+    const selected = this.selectedNote();
+    if (!selected) return;
+    
+    const trimmedTag = tag.trim().toLowerCase();
+    if (trimmedTag && !selected.tags.includes(trimmedTag)) {
+      selected.tags.push(trimmedTag);
+      this.updateNote();
+    }
+  }
+  
+  removeTag(tag: string): void {
+    const selected = this.selectedNote();
+    if (!selected) return;
+    
+    const index = selected.tags.indexOf(tag);
+    if (index > -1) {
+      selected.tags.splice(index, 1);
+      this.updateNote();
+    }
+  }
+  
+  handleTagKeydown(event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const tag = input.value.trim();
+    
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      if (tag) {
+        this.addTag(tag);
+        this.newTagInput.set('');
+        this.hideTagSuggestions();
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.newTagInput.set('');
+      input.blur();
+      this.hideTagSuggestions();
+    } else if (event.key === 'ArrowDown') {
+      // Handle arrow navigation in suggestions (simplified)
+      event.preventDefault();
+    } else if (event.key === 'ArrowUp') {
+      // Handle arrow navigation in suggestions (simplified)
+      event.preventDefault();
+    } else {
+      // Show suggestions as user types
+      setTimeout(() => {
+        this.updateTagSuggestions(this.newTagInput());
+      }, 0);
+    }
+  }
+  
+  addTagIfValid(): void {
+    const tag = this.newTagInput().trim();
+    if (tag) {
+      this.addTag(tag);
+      this.newTagInput.set('');
+      this.hideTagSuggestions();
+    }
+  }
+  
+  // Tag suggestion methods
+  private updateTagSuggestions(query: string): void {
+    if (!query.trim()) {
+      this.hideTagSuggestions();
+      return;
+    }
+    
+    const selectedNote = this.selectedNote();
+    if (!selectedNote) return;
+    
+    const lowercaseQuery = query.toLowerCase();
+    const existingTags = selectedNote.tags;
+    
+    const suggestions = this.getAllTags()
+      .filter(tag => 
+        tag.toLowerCase().includes(lowercaseQuery) && 
+        !existingTags.includes(tag)
+      )
+      .slice(0, 5); // Limit to 5 suggestions
+    
+    this.tagSuggestions.set(suggestions);
+    this.showTagSuggestions.set(suggestions.length > 0);
+  }
+  
+  private hideTagSuggestions(): void {
+    this.showTagSuggestions.set(false);
+    this.tagSuggestions.set([]);
+  }
+  
+  selectTagSuggestion(tag: string): void {
+    this.addTag(tag);
+    this.newTagInput.set('');
+    this.hideTagSuggestions();
   }
 }
