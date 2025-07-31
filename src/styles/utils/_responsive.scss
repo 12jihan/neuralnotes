@@ -1,0 +1,49 @@
+// =============================================================================
+// RESPONSIVE UTILITIES
+// =============================================================================
+
+// Breakpoints
+$breakpoint-md: 1024px;
+$breakpoint-sm: 768px;
+
+// Responsive Design
+@media (max-width: #{$breakpoint-md}) {
+  .sidebar {
+    &--left, &--right {
+      width: 280px;
+      min-width: 280px;
+      
+      &.sidebar--collapsed {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+@media (max-width: #{$breakpoint-sm}) {
+  .app__container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    &--left, &--right {
+      width: 100%;
+      min-width: 100%;
+      height: 200px;
+      border-right: none;
+      border-bottom: 1px solid var(--border-color);
+      
+      &.sidebar--collapsed {
+        height: 50px;
+        width: 100%;
+        min-width: 100%;
+      }
+    }
+    
+    &--right {
+      border-left: none;
+    }
+  }
+}

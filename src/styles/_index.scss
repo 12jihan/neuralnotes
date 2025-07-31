@@ -1,0 +1,25 @@
+// =============================================================================
+// NEURALNOTES STYLES
+// Main stylesheet that imports all components using BEM methodology
+// =============================================================================
+
+// Base styles
+@import 'base/variables';
+@import 'base/reset';
+
+// Layout components
+@import 'layout/app';
+@import 'layout/sidebar';
+@import 'layout/main-content';
+
+// UI Components
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/notes';
+@import 'components/editor';
+@import 'components/backlinks';
+@import 'components/chat';
+@import 'components/markdown';
+
+// Utilities
+@import 'utils/responsive';

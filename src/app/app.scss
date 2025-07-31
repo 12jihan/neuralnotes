@@ -1,0 +1,9 @@
+// Import the complete styles structure
+@import '../styles/index';
+
+// Ensure CSS variables are available at component level
+:host {
+  display: block;
+  height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

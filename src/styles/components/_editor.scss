@@ -1,0 +1,201 @@
+// =============================================================================
+// EDITOR COMPONENTS
+// =============================================================================
+
+.line-editor {
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-lg);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.editor {
+  &__line {
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    word-wrap: break-word;
+    white-space: normal;
+    
+    &:focus {
+      outline: none;
+      background-color: rgba(139, 92, 246, 0.05);
+      border-radius: 2px;
+    }
+    
+    &:empty {
+      &:not(.editor__line--placeholder)::before {
+        content: '';
+        display: inline-block;
+        width: 0;
+      }
+    }
+    
+    // Empty state placeholder
+    &--placeholder:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      font-style: italic;
+      pointer-events: none;
+    }
+    
+    // Visual feedback for focused line
+    &:focus::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 3px;
+      height: 1em;
+      background-color: var(--primary-color);
+      border-radius: 0 2px 2px 0;
+      margin-left: calc(var(--spacing-lg) * -1);
+    }
+  }
+}
+
+// Rendered Line Styles for Live Markdown
+.rendered-line {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: normal;
+  cursor: text;
+  transition: background-color var(--transition-base);
+  
+  // Hover effect to indicate clickability
+  &:hover {
+    background-color: rgba(139, 92, 246, 0.03);
+    border-radius: 2px;
+  }
+  
+  // Empty line handling
+  &:empty,
+  .empty-line {
+    display: block;
+  }
+  
+  // Inline markdown styles that match the editor
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+    display: inline;
+    
+    // Size adjustments for inline headers
+    &:before { content: none; }
+  }
+  
+  h1 { font-size: var(--font-size-2xl); }
+  h2 { font-size: var(--font-size-xl); }
+  h3 { font-size: var(--font-size-lg); }
+  h4 { font-size: var(--font-size-base); }
+  h5 { font-size: var(--font-size-sm); }
+  h6 { font-size: var(--font-size-xs); }
+  
+  // Inline styles
+  strong {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+  }
+  
+  em {
+    font-style: italic;
+    color: var(--text-primary);
+  }
+  
+  code {
+    background: linear-gradient(135deg, #1e2a3a, #2a3441);
+    color: #e1f5fe;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+      border-radius: var(--radius-md);
+      z-index: -1;
+    }
+  }
+  
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  // List styling for single lines
+  ul, ol {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline !important;
+    line-height: inherit !important;
+    list-style: none !important;
+    
+    li {
+      display: inline !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: inherit !important;
+      list-style: none !important;
+      
+      &::before {
+        content: none !important;
+      }
+      
+      &::marker {
+        content: none !important;
+      }
+    }
+  }
+  
+  // Blockquote styling for single lines
+  blockquote {
+    margin: 0;
+    padding: 0 0 0 var(--spacing-md);
+    border-left: 4px solid var(--primary-color);
+    background-color: var(--surface-hover);
+    display: inline-block;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-secondary);
+    font-style: italic;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  // Special handling for different line types
+  &[data-line-type="header"] {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+  }
+  
+  &[data-line-type="list"] {
+    color: var(--text-secondary);
+  }
+  
+  &[data-line-type="quote"] {
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+}

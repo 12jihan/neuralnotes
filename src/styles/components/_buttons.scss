@@ -1,0 +1,112 @@
+// =============================================================================
+// BUTTON COMPONENTS
+// =============================================================================
+
+.btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-base);
+  
+  &:focus {
+    outline: none;
+  }
+
+  &--collapse {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    svg {
+      transition: transform var(--transition-slow);
+    }
+    
+    &:hover {
+      background-color: var(--surface-hover);
+      color: var(--text-primary);
+    }
+  }
+
+  &--primary {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    
+    &:hover {
+      background-color: var(--primary-hover);
+    }
+  }
+
+  &--new-note {
+    margin: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    
+    &:hover {
+      background-color: var(--primary-hover);
+    }
+  }
+
+  &--preview-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    
+    &:hover {
+      background-color: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-light);
+    }
+    
+    &--active {
+      background-color: var(--primary-color);
+      color: var(--text-inverse);
+      border-color: var(--primary-color);
+    }
+  }
+
+  &--send {
+    padding: var(--spacing-sm);
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover:not(&--disabled) {
+      background-color: var(--primary-hover);
+    }
+    
+    &--disabled {
+      background-color: var(--text-muted);
+      cursor: not-allowed;
+    }
+  }
+}

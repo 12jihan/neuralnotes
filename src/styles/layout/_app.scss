@@ -1,0 +1,18 @@
+// =============================================================================
+// APP LAYOUT
+// =============================================================================
+
+.app {
+  &__container {
+    display: flex;
+    height: 100vh;
+    background-color: var(--background-color);
+  }
+}
+
+// Host styles
+:host {
+  display: block;
+  height: 100vh;
+  font-family: var(--font-family-base);
+}

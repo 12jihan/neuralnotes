@@ -1,4 +1,17 @@
-# Neuralnotes
+# Neural Notes
+
+A powerful note-taking application inspired by Capacities.io, built with Angular 20. Features a three-panel layout with collapsible sidebars for optimal productivity.
+
+## Features
+
+- **Three-Panel Layout**: Left sidebar for notes navigation, main content area for editing, and right sidebar for AI assistance
+- **Collapsible Sidebars**: Both left and right sidebars can be collapsed to maximize editing space
+- **Real-time Search**: Instantly search through your notes by title and content
+- **AI Chat Assistant**: Built-in AI assistant to help with your notes and provide insights
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Modern UI**: Clean, intuitive interface with smooth animations
+
+## Getting Started
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.1.
 
