@@ -1,0 +1,7 @@
+// Sidebar right component host styles
+:host {
+  display: block;
+  height: 100%;
+}
+
+// All other sidebar styles are handled globally via styles/_index.scss

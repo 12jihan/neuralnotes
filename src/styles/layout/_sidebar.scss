@@ -3,28 +3,29 @@
 // =============================================================================
 
 .sidebar {
+  height: 100%;
   background-color: var(--surface-color);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   transition: width var(--transition-slow);
-  
+
   &--left {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
-    
+
     &.sidebar--collapsed {
       width: var(--sidebar-width-collapsed);
       min-width: var(--sidebar-width-collapsed);
     }
   }
-  
+
   &--right {
     width: var(--sidebar-right-width);
     min-width: var(--sidebar-right-width);
     border-left: 1px solid var(--border-color);
     border-right: none;
-    
+
     &.sidebar--collapsed {
       width: var(--sidebar-width-collapsed);
       min-width: var(--sidebar-width-collapsed);

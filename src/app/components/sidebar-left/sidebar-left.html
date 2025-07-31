@@ -1,0 +1,135 @@
+<div
+  class="sidebar sidebar--left"
+  [class.sidebar--collapsed]="leftSidebarCollapsed()"
+>
+  <div class="sidebar__header">
+    <h2 class="sidebar__title" *ngIf="!leftSidebarCollapsed()">Notes</h2>
+    <button class="btn btn--collapse" (click)="toggleLeftSidebar()">
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        [style.transform]="
+          leftSidebarCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)'
+        "
+      >
+        <path
+          fill="currentColor"
+          d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div class="sidebar__content" *ngIf="!leftSidebarCollapsed()">
+    <div class="search-box">
+      <input
+        class="input input--search"
+        type="text"
+        placeholder="Search notes..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+    <div class="folders__list">
+      <!-- Folders Section -->
+      @for (folder of folders(); track folder.id) {
+        <div class="folder__container">
+          <div 
+            class="folder__header"
+            [class.folder__header--drag-over]="dragOverFolder() === folder.id"
+            (click)="toggleFolder(folder.id)"
+            (dragover)="onFolderDragOver($event, folder.id)"
+            (dragleave)="onFolderDragLeave()"
+            (drop)="onFolderDrop($event, folder.id)"
+          >
+            <div class="folder__icon" [class.folder__icon--expanded]="folder.isExpanded">
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+              </svg>
+            </div>
+            <div class="folder__info">
+              <div class="folder__name" [style.color]="folder.color">{{ folder.name }}</div>
+              <div class="folder__count">({{ (notesByFolder()[folder.id] || []).length }})</div>
+            </div>
+            <div class="folder__color-indicator" [style.background-color]="folder.color"></div>
+          </div>
+          
+          @if (folder.isExpanded) {
+            <div class="folder__notes">
+              @for (note of (notesByFolder()[folder.id] || []); track note.id) {
+                <div
+                  class="note__item"
+                  [class.note__item--active]="selectedNote()?.id === note.id"
+                  [class.note__item--dragging]="draggedNote()?.id === note.id"
+                  draggable="true"
+                  (dragstart)="onNoteDragStart($event, note)"
+                  (dragend)="onNoteDragEnd()"
+                  (click)="selectNote(note)"
+                >
+                  <div class="note__drag-handle">
+                    <svg viewBox="0 0 24 24" width="12" height="12">
+                      <path fill="currentColor" d="M9 3h2v2H9V3zm0 4h2v2H9V7zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm4-12h2v2h-2V3zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/>
+                    </svg>
+                  </div>
+                  <div class="note__content">
+                    <div class="note__title">{{ note.title }}</div>
+                    <div class="note__preview">{{ note.preview }}</div>
+                    <div class="note__date">{{ note.lastModified | date: "short" }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+      
+      <!-- Uncategorized Notes -->
+      @if ((notesByFolder()['uncategorized'] || []).length > 0) {
+        <div class="folder__container">
+          <div 
+            class="folder__header folder__header--uncategorized"
+            [class.folder__header--drag-over]="dragOverFolder() === 'uncategorized'"
+            (dragover)="onFolderDragOver($event, 'uncategorized')"
+            (dragleave)="onFolderDragLeave()"
+            (drop)="onFolderDrop($event, 'uncategorized')"
+          >
+            <div class="folder__info">
+              <div class="folder__name">Uncategorized</div>
+              <div class="folder__count">({{ (notesByFolder()['uncategorized'] || []).length }})</div>
+            </div>
+          </div>
+          
+          <div class="folder__notes">
+            @for (note of (notesByFolder()['uncategorized'] || []); track note.id) {
+              <div
+                class="note__item"
+                [class.note__item--active]="selectedNote()?.id === note.id"
+                [class.note__item--dragging]="draggedNote()?.id === note.id"
+                draggable="true"
+                (dragstart)="onNoteDragStart($event, note)"
+                (dragend)="onNoteDragEnd()"
+                (click)="selectNote(note)"
+              >
+                <div class="note__drag-handle">
+                  <svg viewBox="0 0 24 24" width="12" height="12">
+                    <path fill="currentColor" d="M9 3h2v2H9V3zm0 4h2v2H9V7zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm4-12h2v2h-2V3zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/>
+                  </svg>
+                </div>
+                <div class="note__content">
+                  <div class="note__title">{{ note.title }}</div>
+                  <div class="note__preview">{{ note.preview }}</div>
+                  <div class="note__date">{{ note.lastModified | date: "short" }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <button class="btn btn--new-note" (click)="createNewNote()">
+      <svg viewBox="0 0 24 24" width="16" height="16">
+        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+      </svg>
+      New Note
+    </button>
+  </div>
+</div>

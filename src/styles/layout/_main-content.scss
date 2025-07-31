@@ -3,6 +3,8 @@
 // =============================================================================
 
 .main-content {
+  width: 100%;
+  height: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -38,14 +40,14 @@
 
 .welcome-message {
   text-align: center;
-  
+
   &__title {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin: 0 0 var(--spacing-sm) 0;
   }
-  
+
   &__text {
     color: var(--text-secondary);
     font-size: var(--font-size-base);

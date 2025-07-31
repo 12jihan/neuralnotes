@@ -1,0 +1,55 @@
+<div
+  class="sidebar sidebar--right"
+  [class.sidebar--collapsed]="rightSidebarCollapsed()"
+>
+  <div class="sidebar__header">
+    <button class="btn btn--collapse" (click)="toggleRightSidebar()">
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        [style.transform]="
+          rightSidebarCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)'
+        "
+      >
+        <path
+          fill="currentColor"
+          d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"
+        />
+      </svg>
+    </button>
+    <h2 class="sidebar__title" *ngIf="!rightSidebarCollapsed()">
+      AI Assistant
+    </h2>
+  </div>
+  <div class="sidebar__content" *ngIf="!rightSidebarCollapsed()">
+    <div class="chat__messages">
+      @for (message of chatMessages(); track message.id) {
+        <div class="message" [class]="'message--' + message.sender">
+          <div class="message__content">{{ message.content }}</div>
+          <div class="message__time">
+            {{ message.timestamp | date: "short" }}
+          </div>
+        </div>
+      }
+    </div>
+    <div class="chat__input">
+      <textarea
+        class="textarea textarea--chat"
+        [(ngModel)]="chatInput"
+        placeholder="Ask AI about your notes..."
+        (keydown.enter)="sendMessage($event)"
+      ></textarea>
+      <button
+        class="btn btn--send"
+        [class.btn--send--disabled]="!chatInput().trim()"
+        (click)="sendMessage()"
+        [disabled]="!chatInput().trim()"
+      >
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

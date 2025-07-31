@@ -1,0 +1,208 @@
+// =============================================================================
+// FOLDER COMPONENTS
+// =============================================================================
+
+.folders__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+    
+    &:hover {
+      background-color: var(--text-muted);
+    }
+  }
+}
+
+.folder {
+  &__container {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: 2px solid transparent;
+    
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+    
+    &--drag-over {
+      background-color: rgba(139, 92, 246, 0.1);
+      border-color: var(--primary-color);
+      transform: scale(1.02);
+    }
+    
+    &--uncategorized {
+      opacity: 0.8;
+    }
+  }
+
+  &__icon {
+    margin-right: var(--spacing-sm);
+    color: var(--text-secondary);
+    transition: transform var(--transition-base);
+    
+    &--expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  &__name {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+  }
+
+  &__count {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--surface-color);
+  }
+
+  &__notes {
+    margin-left: var(--spacing-lg);
+    padding-left: var(--spacing-md);
+    border-left: 2px solid var(--border-color);
+  }
+}
+
+// Updated note styles for drag and drop
+.note {
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    margin-bottom: var(--spacing-xs);
+    transition: all var(--transition-base);
+    border: 1px solid transparent;
+    
+    &:hover {
+      background-color: var(--surface-hover);
+      
+      .note__drag-handle {
+        opacity: 1;
+      }
+    }
+    
+    &--active {
+      background-color: var(--primary-color);
+      color: white;
+      
+      .note__title,
+      .note__preview,
+      .note__date {
+        color: white;
+      }
+      
+      .note__drag-handle {
+        color: white;
+        opacity: 0.8;
+      }
+    }
+    
+    &--dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+
+  &__drag-handle {
+    opacity: 0;
+    color: var(--text-muted);
+    margin-right: var(--spacing-sm);
+    transition: opacity var(--transition-base);
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0; // Allow text truncation
+  }
+
+  &__title {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__preview {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__date {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+}
+
+// Drag preview styles
+.note__item[draggable="true"] {
+  &:hover {
+    cursor: grab;
+  }
+  
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// Drop zone visual feedback
+.folder__header--drag-over {
+  &::after {
+    content: 'Drop here to move to folder';
+    position: absolute;
+    right: var(--spacing-md);
+    font-size: var(--font-size-xs);
+    color: var(--primary-color);
+    font-weight: var(--font-weight-medium);
+  }
+}

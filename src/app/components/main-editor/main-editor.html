@@ -1,0 +1,102 @@
+<!-- Main Content - Note Editor -->
+<div class="main-content">
+  <div class="editor__header">
+    @if (selectedNote()) {
+      <div class="editor__header-content">
+        <input
+          type="text"
+          class="input input--title"
+          [(ngModel)]="selectedNote()!.title"
+          placeholder="Note title..."
+        />
+        <div class="editor__controls">
+          <button
+            class="btn btn--preview-toggle"
+            (click)="toggleMarkdownPreview()"
+            [class.btn--preview-toggle--active]="showMarkdownPreview()"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path
+                fill="currentColor"
+                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+              />
+            </svg>
+            {{ showMarkdownPreview() ? "Edit" : "Preview" }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="welcome-message">
+        <h1 class="welcome-message__title">Welcome to Neural Notes</h1>
+        <p class="welcome-message__text">
+          Select a note from the sidebar or create a new one to get started.
+        </p>
+      </div>
+    }
+  </div>
+  <div class="editor__content">
+    @if (selectedNote()) {
+      @if (showMarkdownPreview()) {
+        <div class="markdown-preview" [innerHTML]="markdownPreview()"></div>
+      } @else {
+        <div class="line-editor">
+          @for (line of selectedNote()!.lines; track $index) {
+            @if (shouldRenderLine()($index)) {
+              <!-- Rendered markdown view -->
+              <div
+                class="rendered-line"
+                [attr.data-line-index]="$index"
+                [innerHTML]="renderLineMarkdown(line)"
+                (click)="handleRenderedLineClick($index, $event)"
+              ></div>
+            } @else {
+              <!-- Editable text view -->
+              <div
+                class="editor__line"
+                contenteditable="true"
+                [attr.data-line-index]="$index"
+                [textContent]="line"
+                (input)="
+                  updateLine($index, $any($event.target).textContent || '')
+                "
+                (keydown)="handleLineKeydown($event, $index)"
+                (focus)="handleLineFocus($index)"
+                (blur)="handleLineBlur($index)"
+              ></div>
+            }
+          }
+          @if (selectedNote()!.lines.length === 0) {
+            <div
+              class="editor__line editor__line--placeholder"
+              contenteditable="true"
+              [attr.data-line-index]="0"
+              (input)="updateLine(0, $any($event.target).textContent || '')"
+              (keydown)="handleLineKeydown($event, 0)"
+              (focus)="handleLineFocus(0)"
+              (blur)="handleLineBlur(0)"
+              data-placeholder="Start writing your note with **markdown**..."
+            ></div>
+          }
+        </div>
+
+        <!-- Backlink Suggestions -->
+        @if (showBacklinkSuggestions()) {
+          <div class="backlink-suggestions">
+            <div class="suggestions__header">Link to note:</div>
+            @for (suggestion of backlinkSuggestions(); track suggestion.id) {
+              <div
+                class="suggestion__item"
+                (click)="insertBacklinkSuggestion(suggestion)"
+              >
+                <div class="suggestion__title">{{ suggestion.title }}</div>
+                <div class="suggestion__preview">
+                  {{ suggestion.preview }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

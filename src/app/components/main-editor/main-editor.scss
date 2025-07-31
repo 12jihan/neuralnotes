@@ -1,0 +1,8 @@
+// Main editor component host styles
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// All other main editor styles are handled globally via styles/_index.scss
