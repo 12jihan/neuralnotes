@@ -30,6 +30,78 @@
       />
     </div>
     <div class="folders__list">
+      <!-- New Folder Creation -->
+      <div class="folder__creation">
+        @if (showNewFolderInput()) {
+          <div class="new-folder-form">
+            <div class="folder-creation-main">
+              <button 
+                class="color-picker-trigger"
+                [style.background-color]="selectedColor()"
+                (click)="toggleColorPicker()"
+                title="Choose folder color"
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path fill="white" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                </svg>
+              </button>
+              <input
+                type="text"
+                class="new-folder-input"
+                placeholder="Enter folder name..."
+                [(ngModel)]="newFolderName"
+                (keydown)="onFolderNameKeydown($event)"
+              />
+            </div>
+            
+            @if (showColorPicker()) {
+              <div class="color-picker-panel">
+                <div class="color-palette">
+                  @for (color of colorPalette; track color) {
+                    <button
+                      class="color-option"
+                      [class.color-option--selected]="selectedColor() === color"
+                      [style.background-color]="color"
+                      (click)="selectPaletteColor(color)"
+                      [title]="color"
+                    ></button>
+                  }
+                </div>
+                <div class="custom-color-section">
+                  <label class="custom-color-label">Custom Color:</label>
+                  <input
+                    type="color"
+                    class="custom-color-input"
+                    [value]="selectedColor()"
+                    (input)="onCustomColorChange($event)"
+                  />
+                </div>
+              </div>
+            }
+            
+            <div class="new-folder-actions">
+              <button class="btn btn--create-folder" (click)="createFolder()">
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </button>
+              <button class="btn btn--cancel-folder" (click)="hideCreateFolderInput()">
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button class="btn btn--new-folder" (click)="showCreateFolderInput()">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+            </svg>
+            New Folder
+          </button>
+        }
+      </div>
+      
       <!-- Folders Section -->
       @for (folder of folders(); track folder.id) {
         <div class="folder__container">

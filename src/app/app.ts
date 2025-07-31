@@ -226,11 +226,36 @@ export class App {
     );
   }
 
-  createFolder(name: string) {
+  createFolder(data: string) {
+    let folderName: string;
+    let folderColor: string;
+    
+    try {
+      // Try to parse as JSON (new format with color picker)
+      const parsed = JSON.parse(data);
+      folderName = parsed.name;
+      folderColor = parsed.color;
+    } catch {
+      // Fallback to treating as plain string (old format)
+      folderName = data;
+      // Generate a random color for backward compatibility
+      const colors = [
+        '#8b5cf6', // Purple
+        '#10b981', // Green
+        '#f59e0b', // Orange
+        '#ef4444', // Red
+        '#3b82f6', // Blue
+        '#ec4899', // Pink
+        '#14b8a6', // Teal
+        '#f97316', // Orange-red
+      ];
+      folderColor = colors[Math.floor(Math.random() * colors.length)];
+    }
+    
     const newFolder: Folder = {
       id: Date.now().toString(),
-      name: name,
-      color: '#6b7280', // Default color
+      name: folderName,
+      color: folderColor,
       isExpanded: true,
       createdAt: new Date(),
     };

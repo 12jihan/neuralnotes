@@ -47,6 +47,28 @@ export class SidebarLeft {
   draggedNote = signal<Note | null>(null);
   dragOverFolder = signal<string | null>(null);
   
+  // Folder creation state
+  showNewFolderInput = signal(false);
+  newFolderName = signal('');
+  selectedColor = signal('#8b5cf6');
+  showColorPicker = signal(false);
+  
+  // Predefined color palette
+  colorPalette = [
+    '#8b5cf6', // Purple
+    '#10b981', // Green
+    '#f59e0b', // Orange
+    '#ef4444', // Red
+    '#3b82f6', // Blue
+    '#ec4899', // Pink
+    '#14b8a6', // Teal
+    '#f97316', // Orange-red
+    '#6366f1', // Indigo
+    '#84cc16', // Lime
+    '#f43f5e', // Rose
+    '#06b6d4', // Cyan
+  ];
+  
   // Computed properties
   filteredNotes = computed(() => {
     const query = this.searchQuery().toLowerCase();
@@ -102,6 +124,60 @@ export class SidebarLeft {
   // Folder methods
   toggleFolder(folderId: string): void {
     this.folderToggled.emit(folderId);
+  }
+  
+  showCreateFolderInput(): void {
+    this.showNewFolderInput.set(true);
+    this.selectedColor.set('#8b5cf6'); // Reset to default color
+    this.showColorPicker.set(false);
+    // Focus the input after the view updates
+    setTimeout(() => {
+      const input = document.querySelector('.new-folder-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+      }
+    }, 0);
+  }
+  
+  hideCreateFolderInput(): void {
+    this.showNewFolderInput.set(false);
+    this.newFolderName.set('');
+    this.selectedColor.set('#8b5cf6');
+    this.showColorPicker.set(false);
+  }
+  
+  createFolder(): void {
+    const name = this.newFolderName().trim();
+    if (name) {
+      // Pass both name and color to the parent
+      this.newFolderCreated.emit(JSON.stringify({ name, color: this.selectedColor() }));
+      this.hideCreateFolderInput();
+    }
+  }
+  
+  // Color picker methods
+  toggleColorPicker(): void {
+    this.showColorPicker.update(show => !show);
+  }
+  
+  selectPaletteColor(color: string): void {
+    this.selectedColor.set(color);
+    this.showColorPicker.set(false);
+  }
+  
+  onCustomColorChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.selectedColor.set(target.value);
+  }
+  
+  onFolderNameKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.createFolder();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.hideCreateFolderInput();
+    }
   }
   
   // Drag and drop methods
