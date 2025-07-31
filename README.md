@@ -2,7 +2,7 @@
 
 **⚠️ ALPHA VERSION - This application is in early development and may contain bugs or incomplete features.**
 
-A powerful note-taking application inspired by Capacities.io, built with Angular 18. Features a modern three-panel layout with advanced markdown support, folder organization, tagging system, and AI assistance for optimal productivity.
+A powerful note-taking application, built with Angular. Features a modern three-panel layout with advanced markdown support, folder organization, tagging system, and AI assistance for optimal productivity.
 
 ## ✨ Features
 
