@@ -40,7 +40,7 @@ A powerful note-taking application, built with Angular. Features a modern three-
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/12jihan/neuralnotes
    cd neuralnotes
    ```
 
