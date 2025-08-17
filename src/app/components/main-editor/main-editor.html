@@ -78,32 +78,47 @@
   <div class="editor__content">
     @if (selectedNote()) {
       @if (showMarkdownPreview()) {
-        <div class="markdown-preview" [innerHTML]="markdownPreview()"></div>
+        <div class="markdown-preview">
+          <markdown [data]="selectedNote()!.content"></markdown>
+        </div>
       } @else {
         <div class="line-editor">
-          @for (line of selectedNote()!.lines; track $index) {
-            @if (shouldRenderLine()($index)) {
-              <!-- Rendered markdown view -->
+          @for (item of getRenderedItems(); track item.id) {
+            @if (item.type === 'codeblock') {
+              <!-- Single code block element -->
               <div
-                class="rendered-line"
-                [attr.data-line-index]="$index"
-                [innerHTML]="renderLineMarkdown(line)"
-                (click)="handleRenderedLineClick($index, $event)"
+                class="code-block-container"
+                [attr.data-start-index]="item.startIndex"
+                [attr.data-end-index]="item.endIndex"
+                [innerHTML]="item.content"
+                (click)="handleCodeBlockClick(item.startIndex, $event)"
               ></div>
             } @else {
-              <!-- Editable text view -->
-              <div
-                class="editor__line"
-                contenteditable="true"
-                [attr.data-line-index]="$index"
-                [textContent]="line"
-                (input)="
-                  updateLine($index, $any($event.target).textContent || '')
-                "
-                (keydown)="handleLineKeydown($event, $index)"
-                (focus)="handleLineFocus($index)"
-                (blur)="handleLineBlur($index)"
-              ></div>
+              <!-- Regular line handling -->
+              @if (item.shouldRender) {
+                <!-- Rendered markdown view -->
+                <div
+                  class="rendered-line"
+                  [attr.data-line-index]="item.index"
+                  [innerHTML]="item.content"
+                  (click)="handleRenderedLineClick(item.index, $event)"
+                ></div>
+              } @else {
+                <!-- Editable text view -->
+                <div
+                  class="editor__line"
+                  contenteditable="true"
+                  [attr.data-line-index]="item.index"
+                  [textContent]="item.content"
+                  (input)="
+                    updateLine(item.index, $any($event.target).textContent || '')
+                  "
+                  (keydown)="handleLineKeydown($event, item.index)"
+                  (focus)="handleLineFocus(item.index)"
+                  (blur)="handleLineBlur(item.index)"
+                  (click)="handleEditableLineClick(item.index, $event)"
+                ></div>
+              }
             }
           }
           @if (selectedNote()!.lines.length === 0) {
@@ -115,6 +130,7 @@
               (keydown)="handleLineKeydown($event, 0)"
               (focus)="handleLineFocus(0)"
               (blur)="handleLineBlur(0)"
+              (click)="handleEditableLineClick(0, $event)"
               data-placeholder="Start writing your note with **markdown**..."
             ></div>
           }
