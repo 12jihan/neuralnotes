@@ -6,20 +6,20 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-sm);
-  
+
   // Custom scrollbar
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background-color: var(--border-color);
     border-radius: 3px;
-    
+
     &:hover {
       background-color: var(--text-muted);
     }
@@ -44,17 +44,17 @@
     cursor: pointer;
     transition: all var(--transition-base);
     border: 2px solid transparent;
-    
+
     &:hover {
       background-color: var(--surface-hover);
     }
-    
+
     &--drag-over {
       background-color: rgba(139, 92, 246, 0.1);
       border-color: var(--primary-color);
       transform: scale(1.02);
     }
-    
+
     &--uncategorized {
       opacity: 0.8;
     }
@@ -64,7 +64,7 @@
     margin-right: var(--spacing-sm);
     color: var(--text-secondary);
     transition: transform var(--transition-base);
-    
+
     &--expanded {
       transform: rotate(90deg);
     }
@@ -112,31 +112,31 @@
     margin-bottom: var(--spacing-xs);
     transition: all var(--transition-base);
     border: 1px solid transparent;
-    
+
     &:hover {
       background-color: var(--surface-hover);
-      
+
       .note__drag-handle {
         opacity: 1;
       }
     }
-    
+
     &--active {
       background-color: var(--primary-color);
       color: white;
-      
+
       .note__title,
       .note__preview,
       .note__date {
         color: white;
       }
-      
+
       .note__drag-handle {
         color: white;
         opacity: 0.8;
       }
     }
-    
+
     &--dragging {
       opacity: 0.5;
       transform: rotate(2deg);
@@ -150,7 +150,7 @@
     margin-right: var(--spacing-sm);
     transition: opacity var(--transition-base);
     cursor: grab;
-    
+
     &:active {
       cursor: grabbing;
     }
@@ -178,6 +178,7 @@
     line-height: 1.4;
     margin-bottom: var(--spacing-xs);
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -194,7 +195,7 @@
   &:hover {
     cursor: grab;
   }
-  
+
   &:active {
     cursor: grabbing;
   }
@@ -203,7 +204,7 @@
 // Drop zone visual feedback
 .folder__header--drag-over {
   &::after {
-    content: 'Drop here to move to folder';
+    content: "Drop here to move to folder";
     position: absolute;
     right: var(--spacing-md);
     font-size: var(--font-size-xs);
@@ -237,13 +238,13 @@
   background-color: var(--surface-color);
   color: var(--text-primary);
   font-size: var(--font-size-sm);
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
     background-color: var(--background-color);
   }
-  
+
   &::placeholder {
     color: var(--text-muted);
   }
@@ -268,14 +269,14 @@
     gap: var(--spacing-sm);
     font-size: var(--font-size-sm);
     transition: all var(--transition-base);
-    
+
     &:hover {
       background-color: var(--surface-hover);
       border-color: var(--primary-color);
       color: var(--primary-color);
     }
   }
-  
+
   &--create-folder {
     padding: var(--spacing-xs);
     background-color: var(--primary-color);
@@ -284,12 +285,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover {
       background-color: var(--primary-hover);
     }
   }
-  
+
   &--cancel-folder {
     padding: var(--spacing-xs);
     background-color: var(--text-muted);
@@ -298,7 +299,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover {
       background-color: var(--error-color);
     }
@@ -317,7 +318,7 @@
   justify-content: center;
   transition: all var(--transition-base);
   box-shadow: var(--shadow-sm);
-  
+
   &:hover {
     transform: scale(1.1);
     box-shadow: var(--shadow-md);
@@ -347,18 +348,20 @@
   cursor: pointer;
   transition: all var(--transition-base);
   position: relative;
-  
+
   &:hover {
     transform: scale(1.2);
     box-shadow: var(--shadow-md);
   }
-  
+
   &--selected {
     border-color: var(--text-primary);
-    box-shadow: 0 0 0 2px var(--surface-color), 0 0 0 4px var(--primary-color);
-    
+    box-shadow:
+      0 0 0 2px var(--surface-color),
+      0 0 0 4px var(--primary-color);
+
     &::after {
-      content: '✓';
+      content: "✓";
       position: absolute;
       top: 50%;
       left: 50%;
@@ -392,20 +395,21 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   background: none;
-  
+
   &::-webkit-color-swatch-wrapper {
     padding: 0;
     border: none;
     border-radius: var(--radius-md);
   }
-  
+
   &::-webkit-color-swatch {
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
   }
-  
+
   &::-moz-color-swatch {
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
   }
 }
+
