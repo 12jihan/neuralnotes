@@ -7,6 +7,8 @@ import {
   input,
   output,
   effect,
+  Signal,
+  WritableSignal,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -21,6 +23,12 @@ interface Note {
   lastModified: Date;
   folderId?: string;
   tags: string[];
+}
+
+interface Range {
+  start: number;
+  end: number;
+  language?: string;
 }
 
 @Component({
@@ -45,9 +53,7 @@ export class MainEditor {
   lineRenderModes = signal<{ [lineIndex: number]: 'edit' | 'rendered' }>({});
 
   // Code block state
-  codeBlockRanges = signal<{ start: number; end: number; language?: string }[]>(
-    [],
-  );
+  codeBlockRanges: WritableSignal<Range[]> = signal<Range[]>([]);
 
   // Backlink autocomplete state
   showBacklinkSuggestions = signal(false);
@@ -79,23 +85,25 @@ export class MainEditor {
   // Computed properties
 
   // Get rendered items (combining code blocks and individual lines)
-  getRenderedItems = computed(() => {
-    const selected = this.selectedNote();
+  getRenderedItems: Signal<any[]> = computed((): any[] => {
+    const selected: Note | null = this.selectedNote();
     if (!selected) return [];
 
-    const ranges = this.codeBlockRanges();
-    const editingIndex = this.editingLineIndex();
-    const focusedIndex = this.focusedLineIndex();
+    const ranges: Range[] = this.codeBlockRanges();
+    const editingIndex: number | null = this.editingLineIndex();
+    const focusedIndex: number | null = this.focusedLineIndex();
 
     const items: any[] = [];
-    let skipUntil = -1;
+    let skipUntil: number = -1;
 
-    selected.lines.forEach((line, index) => {
+    selected.lines.forEach((line: string, index: number): void => {
       // Skip lines that are part of already processed code blocks
       if (index <= skipUntil) return;
 
       // Check if this line starts a code block
-      const codeBlockRange = ranges.find((range) => range.start === index);
+      const codeBlockRange = ranges.find(
+        (range: Range): boolean => range.start === index,
+      );
 
       if (codeBlockRange) {
         // Check if any line in the code block is being edited
@@ -148,8 +156,8 @@ export class MainEditor {
       }
     });
 
-    console.log('🔧 Final items:', items);
-    console.log('🔧 Items count:', items.length);
+    // console.log('🔧 Final items:', items);
+    // console.log('🔧 Items count:', items.length);
     return items;
   });
 
@@ -1149,4 +1157,3 @@ export class MainEditor {
     this.hideTagSuggestions();
   }
 }
-
