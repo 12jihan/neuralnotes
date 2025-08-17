@@ -1,26 +1,27 @@
 // =============================================================================
 // NEURALNOTES STYLES
-// Main stylesheet that imports all components using BEM methodology
+// Main stylesheet that uses all components using BEM methodology
 // =============================================================================
 
 // Base styles
-@import 'base/variables';
-@import 'base/reset';
+@use "base/variables";
+@use "base/reset";
 
 // Layout components
-@import 'layout/app';
-@import 'layout/sidebar';
-@import 'layout/main-content';
+@use "layout/app";
+@use "layout/sidebar";
+@use "layout/main-content";
 
 // UI Components
-@import 'components/buttons';
-@import 'components/forms';
-@import 'components/notes';
-@import 'components/folders';
-@import 'components/editor';
-@import 'components/backlinks';
-@import 'components/chat';
-@import 'components/markdown';
+@use "components/buttons";
+@use "components/forms";
+@use "components/notes";
+@use "components/folders";
+@use "components/editor";
+@use "components/backlinks";
+@use "components/chat";
+@use "components/markdown";
 
 // Utilities
-@import 'utils/responsive';
+@use "utils/responsive";
+
