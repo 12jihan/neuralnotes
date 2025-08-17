@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, WritableSignal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -36,7 +36,14 @@ interface ChatMessage {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, CommonModule, SidebarRight, SidebarLeft, MainEditor],
+  imports: [
+    RouterOutlet,
+    FormsModule,
+    CommonModule,
+    SidebarRight,
+    SidebarLeft,
+    MainEditor,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -54,7 +61,7 @@ export class App {
   }
 
   // Folders management
-  folders = signal<Folder[]>([
+  folders: WritableSignal<Folder[]> = signal<Folder[]>([
     {
       id: 'personal',
       name: 'Personal',
@@ -146,11 +153,10 @@ export class App {
     },
   ]);
 
-  selectedNote = signal<Note | null>(null);
-  // searchQuery = signal(''); // Moved to sidebar-left
+  selectedNote: WritableSignal<Note | null> = signal<Note | null>(null);
 
   // Chat functionality
-  chatMessages = signal<ChatMessage[]>([
+  chatMessages: WritableSignal<ChatMessage[]> = signal<ChatMessage[]>([
     {
       id: '1',
       content:
@@ -159,18 +165,8 @@ export class App {
       timestamp: new Date(),
     },
   ]);
-  // chatInput = signal(''); // Moved to sidebar-right
-
-  // Computed properties
-  // filteredNotes moved to sidebar-left component
-
-  // Markdown rendering, backlink processing, and line editing moved to main-editor component
 
   // Methods
-  // toggleLeftSidebar and toggleRightSidebar moved to respective sidebar components
-
-  // toggleMarkdownPreview moved to main-editor component
-
   selectNote(note: Note) {
     this.selectedNote.set(note);
     // Line editing state reset is now handled by main-editor component
@@ -192,19 +188,24 @@ export class App {
   }
 
   handleNoteUpdated(updatedNote: Note) {
-    const existingNote = this.notes().find(note => note.id === updatedNote.id);
-    
+    const existingNote = this.notes().find(
+      (note) => note.id === updatedNote.id,
+    );
+
     if (!existingNote) {
       // This is a new note (from backlink creation) - add it and select it
-      this.notes.update((notes) => [updatedNote, ...notes]);
+      this.notes.update((notes: Note[]): Note[] => [updatedNote, ...notes]);
       this.selectedNote.set(updatedNote);
     } else if (updatedNote === existingNote) {
       // This is backlink navigation to an existing note - just select it
       this.selectedNote.set(updatedNote);
     } else {
       // This is an update to an existing note - update it in the array
-      this.notes.update((notes) =>
-        notes.map((note) => (note.id === updatedNote.id ? { ...updatedNote } : note)),
+      this.notes.update((notes: Note[]): Note[] =>
+        notes.map(
+          (note: Note): Note =>
+            note.id === updatedNote.id ? { ...updatedNote } : note,
+        ),
       );
     }
   }
@@ -215,8 +216,8 @@ export class App {
       folders.map((folder) =>
         folder.id === folderId
           ? { ...folder, isExpanded: !folder.isExpanded }
-          : folder
-      )
+          : folder,
+      ),
     );
   }
 
@@ -225,15 +226,15 @@ export class App {
       notes.map((note) =>
         note.id === event.noteId
           ? { ...note, folderId: event.folderId || undefined }
-          : note
-      )
+          : note,
+      ),
     );
   }
 
   createFolder(data: string) {
     let folderName: string;
     let folderColor: string;
-    
+
     try {
       // Try to parse as JSON (new format with color picker)
       const parsed = JSON.parse(data);
@@ -255,7 +256,7 @@ export class App {
       ];
       folderColor = colors[Math.floor(Math.random() * colors.length)];
     }
-    
+
     const newFolder: Folder = {
       id: Date.now().toString(),
       name: folderName,
