@@ -8,6 +8,10 @@
   padding: var(--spacing-lg);
   font-family: inherit;
   box-sizing: border-box;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .editor {
@@ -22,6 +26,11 @@
     margin: 0;
     word-wrap: break-word;
     white-space: normal;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    
     
     &:focus {
       outline: none;
@@ -70,6 +79,10 @@
   white-space: normal;
   cursor: text;
   transition: background-color var(--transition-base);
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
   
   // Hover effect to indicate clickability
   &:hover {
@@ -136,6 +149,38 @@
     }
   }
   
+  // Code blocks (```code```)
+  pre {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin: 0;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 
+      var(--shadow-md),
+      0 0 0 1px rgba(139, 92, 246, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    overflow-x: auto;
+    display: inline-block;
+    
+    code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #f0f6fc;
+      box-shadow: none;
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      
+      &::before {
+        display: none;
+      }
+    }
+  }
+  
   a {
     color: var(--primary-color);
     text-decoration: none;
@@ -147,25 +192,101 @@
   
   // List styling for single lines
   ul, ol {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: inline !important;
-    line-height: inherit !important;
-    list-style: none !important;
+    margin: 0;
+    padding: 0 0 0 var(--spacing-lg);
+    display: inline-block;
+    line-height: inherit;
+    width: 100%;
     
     li {
-      display: inline !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      line-height: inherit !important;
-      list-style: none !important;
-      
-      &::before {
-        content: none !important;
-      }
+      display: list-item;
+      margin: 0;
+      padding: 0;
+      line-height: inherit;
       
       &::marker {
-        content: none !important;
+        color: var(--primary-color);
+      }
+    }
+  }
+  
+  ul {
+    list-style-type: disc;
+    
+    li::marker {
+      content: "• ";
+    }
+  }
+  
+  ol {
+    list-style-type: decimal;
+  }
+  
+  // Code block container styling
+  .code-block-container {
+    width: 100%;
+    margin: 0;
+    cursor: text;
+    display: block;
+    
+    pre {
+      margin: 0;
+      border-radius: var(--radius-lg);
+      width: 100%;
+    }
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  // Code line styling (for lines inside code blocks)
+  .code-line {
+    font-family: var(--font-family-mono);
+    background: transparent;
+    color: #f0f6fc;
+    padding: 0;
+    margin: 0;
+    white-space: pre;
+    display: block;
+    line-height: 1.4;
+  }
+
+  // Checkbox styling
+  .checkbox-line {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    width: 100%;
+    
+    .checkbox-icon {
+      font-size: var(--font-size-lg);
+      color: var(--primary-color);
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+      line-height: 1;
+      transition: all var(--transition-base);
+      
+      &:hover {
+        color: var(--primary-hover);
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+    
+    .checkbox-text {
+      flex: 1;
+      line-height: inherit;
+      transition: all var(--transition-base);
+      
+      &.completed {
+        text-decoration: line-through;
+        opacity: 0.6;
+        color: var(--text-muted);
       }
     }
   }
