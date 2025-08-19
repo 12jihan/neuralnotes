@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { GoogleGenAI, GoogleGenAIOptions } from '@google/genai';
 import { environment } from '../../../../environments/environment';
 
