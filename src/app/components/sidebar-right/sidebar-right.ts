@@ -9,7 +9,7 @@ import {
   inject,
 } from '@angular/core';
 import { GeminiAi } from '../../services/llm-services/GeminiAi/gemini-ai';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 interface ChatMessage {
   id: string;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI, GoogleGenAIOptions } from '@google/genai';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
