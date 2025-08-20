@@ -11,6 +11,7 @@ export class GeminiAi {
   };
 
   ai: GoogleGenAI | null = null;
+  ai_response: string = '';
 
   constructor() {
     this.ai = new GoogleGenAI(this.options);
@@ -28,5 +29,24 @@ export class GeminiAi {
     });
 
     console.log('response: ', response);
+  }
+
+  async dummy(): Promise<any> {
+    console.log('response: ');
+  }
+
+  async send(message: string): Promise<any> {
+    const response = await this.ai!.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: message,
+      config: {
+        thinkingConfig: {
+          thinkingBudget: 0, // Disables thinking
+        },
+      },
+    });
+
+    console.log('response: ', response);
+    this.ai_response = response.text ? response.text : '';
   }
 }

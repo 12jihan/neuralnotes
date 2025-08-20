@@ -25,7 +25,8 @@ interface ChatMessage {
   styleUrl: './sidebar-right.scss',
 })
 export class SidebarRight {
-  gem: GeminiAi = inject(GeminiAi);
+  // Injections
+  gemini: GeminiAi = inject(GeminiAi);
 
   // Inputs
   chatMessages = input.required<ChatMessage[]>();
@@ -35,7 +36,7 @@ export class SidebarRight {
 
   // Local state
   rightSidebarCollapsed: WritableSignal<boolean> = signal(false);
-  chatInput = signal('');
+  chatInput: WritableSignal<string> = signal('');
 
   toggleRightSidebar(): void {
     this.rightSidebarCollapsed.update(
@@ -43,9 +44,7 @@ export class SidebarRight {
     );
   }
 
-  sendMessage(event?: KeyboardEvent | Event): void {
-    this.gem.test();
-    console.log('api-key', environment.gemini_api_key);
+  async sendMessage(event?: KeyboardEvent | Event): Promise<void> {
     if (event && event instanceof KeyboardEvent && !event.ctrlKey) {
       event.preventDefault();
       return;
@@ -54,7 +53,9 @@ export class SidebarRight {
     const input = this.chatInput().trim();
     if (!input) return;
 
-    this.messageSent.emit(input);
     this.chatInput.set('');
+    // this.gemini.send(this.chatInput());
+    debugger;
+    this.messageSent.emit(input);
   }
 }
