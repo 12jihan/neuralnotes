@@ -7,9 +7,11 @@ import {
   input,
   output,
   inject,
+  Signal,
 } from '@angular/core';
 import { GeminiAi } from '../../services/llm-services/GeminiAi/gemini-ai';
 import { environment } from '../../../../environments/environment';
+import { Chat } from '../../services/ChatServices/chat';
 
 interface ChatMessage {
   id: string;
@@ -27,12 +29,13 @@ interface ChatMessage {
 export class SidebarRight {
   // Injections
   gemini: GeminiAi = inject(GeminiAi);
-
+  chatService: Chat = inject(Chat);
   // Inputs
-  chatMessages = input.required<ChatMessage[]>();
+  // chatMessages = input.required<ChatMessage[]>();
+  chatMessages: Signal<ChatMessage[]> = this.chatService.chatMessages;
 
   // Outputs
-  messageSent = output<string>();
+  // messageSent = output<string>();
 
   // Local state
   rightSidebarCollapsed: WritableSignal<boolean> = signal(false);
@@ -45,6 +48,7 @@ export class SidebarRight {
   }
 
   async sendMessage(event?: KeyboardEvent | Event): Promise<void> {
+    // TODO: Forgot what this does. Double check later and figure out what's going on here.
     if (event && event instanceof KeyboardEvent && !event.ctrlKey) {
       event.preventDefault();
       return;
@@ -54,8 +58,9 @@ export class SidebarRight {
     if (!input) return;
 
     this.chatInput.set('');
-    // this.gemini.send(this.chatInput());
-    debugger;
-    this.messageSent.emit(input);
+    this.chatService.handleMessageSent(input);
+
+    // This was used to handle the message with the output() binding to a function in the parent component.
+    // this.messageSent.emit(input);
   }
 }

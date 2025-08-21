@@ -1,4 +1,11 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  Signal,
+  signal,
+  WritableSignal,
+} from '@angular/core';
+import { GeminiAi } from '../llm-services/GeminiAi/gemini-ai';
 
 interface Folder {
   id: string;
@@ -30,8 +37,11 @@ interface ChatMessage {
   providedIn: 'root',
 })
 export class Chat {
+  // Injections:
+  _gemini: GeminiAi = inject(GeminiAi);
+
   // Chat functionality
-  chatMessages: WritableSignal<ChatMessage[]> = signal<ChatMessage[]>([
+  private _chatMessages: WritableSignal<ChatMessage[]> = signal<ChatMessage[]>([
     {
       id: '1',
       content:
@@ -41,16 +51,14 @@ export class Chat {
     },
   ]);
 
-  private async generateAIResponse(userInput: string): Promise<string> {
-    const responses = [
-      "That's an interesting point! Could you elaborate more?",
-      'I can help you organize those thoughts into a structured note.',
-      'Based on your notes, I notice some patterns. Would you like me to analyze them?',
-      'Let me help you find related notes or create connections.',
-      'That reminds me of your previous note. Shall I bring it up?',
-    ];
+  public chatMessages: Signal<ChatMessage[]> = this._chatMessages.asReadonly();
 
-    // return responses[Math.floor(Math.random() * responses.length)];
+  private generateAIResponse(userInput: string): string {
+    this._gemini.test();
+    return '';
+  }
+
+  private async _generateAIResponse(userInput: string): Promise<string> {
     return '';
   }
 
@@ -63,25 +71,25 @@ export class Chat {
       timestamp: new Date(),
     };
 
-    this.chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+    this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
       ...messages,
       userMessage,
     ]);
 
     // Simulate AI response (replace with actual AI integration later)
-    // setTimeout(() => {
-    //   const aiMessage: ChatMessage = {
-    //     id: (Date.now() + 1).toString(),
-    //     // content: this.generateAIResponse(input),
-    //     content: '',
-    //     sender: 'ai',
-    //     timestamp: new Date(),
-    //   };
-    //
-    //   this.chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
-    //     ...messages,
-    //     aiMessage,
-    //   ]);
-    // }, 1000);
+    setTimeout(() => {
+      const aiMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        content: this.generateAIResponse(input),
+        // content: '',
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+        ...messages,
+        aiMessage,
+      ]);
+    }, 1000);
   }
 }
