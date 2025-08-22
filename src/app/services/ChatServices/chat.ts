@@ -55,7 +55,8 @@ export class Chat {
 
   private generateAIResponse(userInput: string): string {
     this._gemini.test();
-    return '';
+    // return responses[Math.floor(Math.random() * responses.length)];
+    // return '';
   }
 
   private async _generateAIResponse(userInput: string): Promise<string> {
