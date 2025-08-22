@@ -7,32 +7,6 @@ import {
 } from '@angular/core';
 import { GeminiAi } from '../llm-services/GeminiAi/gemini-ai';
 
-interface Folder {
-  id: string;
-  name: string;
-  color: string;
-  isExpanded: boolean;
-  createdAt: Date;
-}
-
-interface Note {
-  id: string;
-  title: string;
-  content: string; // Keep for compatibility
-  lines: string[]; // New line-based structure
-  preview: string;
-  lastModified: Date;
-  folderId?: string; // Optional folder assignment
-  tags: string[]; // Tags for categorization
-}
-
-interface ChatMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -41,6 +15,7 @@ export class Chat {
   _gemini: GeminiAi = inject(GeminiAi);
 
   // Chat functionality
+  private _message: WritableSignal<ChatMessage | null> = signal(null);
   private _chatMessages: WritableSignal<ChatMessage[]> = signal<ChatMessage[]>([
     {
       id: '1',
@@ -51,17 +26,8 @@ export class Chat {
     },
   ]);
 
+  public message: Signal<ChatMessage | null> = this._message.asReadonly();
   public chatMessages: Signal<ChatMessage[]> = this._chatMessages.asReadonly();
-
-  private generateAIResponse(userInput: string): string {
-    this._gemini.test();
-    // return responses[Math.floor(Math.random() * responses.length)];
-    // return '';
-  }
-
-  private async _generateAIResponse(userInput: string): Promise<string> {
-    return '';
-  }
 
   handleMessageSent(input: string) {
     // Add user message
@@ -77,20 +43,31 @@ export class Chat {
       userMessage,
     ]);
 
-    // Simulate AI response (replace with actual AI integration later)
-    setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: this.generateAIResponse(input),
-        // content: '',
-        sender: 'ai',
-        timestamp: new Date(),
-      };
-
-      this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
-        ...messages,
-        aiMessage,
-      ]);
-    }, 1000);
+    this._message.set(userMessage);
+    if (this.message()!.content) {
+      this._gemini.send(this.message()!.content);
+      this._chatMessages.update(
+        (chatmessages: ChatMessage[]): ChatMessage[] => [
+          ...chatmessages,
+          this._gemini.response()!,
+        ],
+      );
+    }
   }
+  // Simulate AI response (replace with actual AI integration later)
+  //   setTimeout(() => {
+  //     const aiMessage: ChatMessage = {
+  //       id: (Date.now() + 1).toString(),
+  //       content: this.generateAIResponse(input),
+  //       // content: '',
+  //       sender: 'ai',
+  //       timestamp: new Date(),
+  //     };
+  //
+  //     this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+  //       ...messages,
+  //       aiMessage,
+  //     ]);
+  //   }, 1000);
+  // }
 }

@@ -11,7 +11,8 @@ export class GeminiAi {
   };
 
   private _ai: GoogleGenAI | null = null;
-  private _response: WritableSignal<string> = signal('');
+  private _response: WritableSignal<ChatMessage | null> =
+    signal<ChatMessage | null>(null);
   private _isGenerating: WritableSignal<boolean> = signal(false);
   private _error: WritableSignal<ErrorState> = signal(null);
   private _history: WritableSignal<string[]> = signal([]);
@@ -48,7 +49,6 @@ export class GeminiAi {
     if (this._ai) throw new Error('Gemini AI service not initialized...');
 
     this._error.set(null);
-
     try {
       this._isGenerating.set(true);
 
@@ -63,9 +63,20 @@ export class GeminiAi {
       });
       const text: string | undefined = response.text;
 
-      if (text) this._response.set(text);
+      let aimessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        content: text ? text : '',
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      if (text) this._response.set(aimessage);
     } catch (error: unknown) {
+      this._error.set(
+        'The AI was unable to respond properly. Please try again later...',
+      );
     } finally {
+      this._isGenerating.set(false);
     }
   }
 
