@@ -29,7 +29,7 @@ export class Chat {
   public message: Signal<ChatMessage | null> = this._message.asReadonly();
   public chatMessages: Signal<ChatMessage[]> = this._chatMessages.asReadonly();
 
-  handleMessageSent(input: string) {
+  handleMessageSent(input: string): void {
     // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -37,13 +37,15 @@ export class Chat {
       sender: 'user',
       timestamp: new Date(),
     };
-
+    console.log('user message:', userMessage);
     this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
       ...messages,
       userMessage,
     ]);
 
     this._message.set(userMessage);
+    console.log('current message signal:', this.message());
+
     if (this.message()!.content) {
       this._gemini.send(this.message()!.content);
       this._chatMessages.update(

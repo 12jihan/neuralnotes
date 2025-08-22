@@ -45,7 +45,8 @@ export class GeminiAi {
   }
 
   async send(message: string): Promise<void> {
-    if (message.trim()) throw new Error('Message cannot be empty...');
+    if (!message.trim() || message.trim() == '')
+      throw new Error('Message cannot be empty...');
     if (this._ai) throw new Error('Gemini AI service not initialized...');
 
     this._error.set(null);
@@ -63,14 +64,15 @@ export class GeminiAi {
       });
       const text: string | undefined = response.text;
 
-      let aimessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: text ? text : '',
-        sender: 'ai',
-        timestamp: new Date(),
-      };
-
-      if (text) this._response.set(aimessage);
+      if (text) {
+        let _message: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: text ? text : '',
+          sender: 'ai',
+          timestamp: new Date(),
+        };
+        this._response.set(_message);
+      }
     } catch (error: unknown) {
       this._error.set(
         'The AI was unable to respond properly. Please try again later...',
