@@ -29,10 +29,10 @@ interface ChatMessage {
 export class SidebarRight {
   // Injections
   gemini: GeminiAi = inject(GeminiAi);
-  chatService: Chat = inject(Chat);
+  chat: Chat = inject(Chat);
   // Inputs
   // chatMessages = input.required<ChatMessage[]>();
-  chatMessages: Signal<ChatMessage[]> = this.chatService.chatMessages;
+  chatMessages = this.chat.chatMessages;
 
   // Outputs
   // messageSent = output<string>();
@@ -47,6 +47,9 @@ export class SidebarRight {
     );
   }
 
+  constructor() {
+    console.log(this.chat.chatMessages());
+  }
   async sendMessage(event?: KeyboardEvent | Event): Promise<void> {
     // TODO: Forgot what this does. Double check later and figure out what's going on here.
     if (event && event instanceof KeyboardEvent && !event.ctrlKey) {
@@ -58,7 +61,7 @@ export class SidebarRight {
     if (!input) return;
 
     this.chatInput.set('');
-    this.chatService.handleMessageSent(input);
+    this.chat.handleMessageSent(input);
 
     // This was used to handle the message with the output() binding to a function in the parent component.
     // this.messageSent.emit(input);

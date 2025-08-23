@@ -18,7 +18,7 @@ export class Chat {
   private _message: WritableSignal<ChatMessage | null> = signal(null);
   private _chatMessages: WritableSignal<ChatMessage[]> = signal<ChatMessage[]>([
     {
-      id: '1',
+      id: (Date.now() + 1).toString(),
       content:
         "Hello! I'm your AI assistant. I can help you with your notes, answer questions, and provide insights.",
       sender: 'ai',
@@ -29,7 +29,7 @@ export class Chat {
   public message: Signal<ChatMessage | null> = this._message.asReadonly();
   public chatMessages: Signal<ChatMessage[]> = this._chatMessages.asReadonly();
 
-  handleMessageSent(input: string): void {
+  async handleMessageSent(input: string): Promise<void> {
     // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -37,39 +37,15 @@ export class Chat {
       sender: 'user',
       timestamp: new Date(),
     };
-    console.log('user message:', userMessage);
     this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
       ...messages,
       userMessage,
     ]);
-
     this._message.set(userMessage);
-    console.log('current message signal:', this.message());
 
     if (this.message()!.content) {
-      this._gemini.send(this.message()!.content);
-      this._chatMessages.update(
-        (chatmessages: ChatMessage[]): ChatMessage[] => [
-          ...chatmessages,
-          this._gemini.response()!,
-        ],
-      );
+      await this._gemini.send(this.message()!.content);
+      console.log('test async');
     }
   }
-  // Simulate AI response (replace with actual AI integration later)
-  //   setTimeout(() => {
-  //     const aiMessage: ChatMessage = {
-  //       id: (Date.now() + 1).toString(),
-  //       content: this.generateAIResponse(input),
-  //       // content: '',
-  //       sender: 'ai',
-  //       timestamp: new Date(),
-  //     };
-  //
-  //     this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
-  //       ...messages,
-  //       aiMessage,
-  //     ]);
-  //   }, 1000);
-  // }
 }

@@ -28,9 +28,16 @@
         <div class="message" [class]="'message--' + message.sender">
           <div class="message__content">{{ message.content }}</div>
           <div class="message__time">
-            {{ message.timestamp | date: "short" }}
+            <!-- {{ message.timestamp | date: "short" }} -->
           </div>
         </div>
+
+        <!-- <div class="message" [class]="'message--' + message.sender"> -->
+        <!--   <div class="message__content">{{ message.content }}</div> -->
+        <!--   <div class="message__time"> -->
+        <!--     {{ message.timestamp | date: "short" }} -->
+        <!--   </div> -->
+        <!-- </div> -->
       }
     </div>
     <div class="chat__input">

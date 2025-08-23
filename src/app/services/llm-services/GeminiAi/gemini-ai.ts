@@ -1,11 +1,14 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { GoogleGenAI, GoogleGenAIOptions } from '@google/genai';
 import { environment } from '../../../../../environments/environment';
+import { Chat } from '../../ChatServices/chat';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GeminiAi {
+  // _chat: Chat = inject(Chat);
+
   options: GoogleGenAIOptions = {
     apiKey: environment.gemini_api_key,
   };
@@ -47,13 +50,13 @@ export class GeminiAi {
   async send(message: string): Promise<void> {
     if (!message.trim() || message.trim() == '')
       throw new Error('Message cannot be empty...');
-    if (this._ai) throw new Error('Gemini AI service not initialized...');
+    if (!this._ai) throw new Error('Gemini AI service not initialized...');
 
     this._error.set(null);
     try {
       this._isGenerating.set(true);
 
-      const response = await this._ai!.models.generateContent({
+      const airesponse = await this._ai!.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: message,
         config: {
@@ -62,7 +65,8 @@ export class GeminiAi {
           },
         },
       });
-      const text: string | undefined = response.text;
+      const text: string | undefined = airesponse.text;
+      console.log('ai response', airesponse);
 
       if (text) {
         let _message: ChatMessage = {
@@ -72,6 +76,7 @@ export class GeminiAi {
           timestamp: new Date(),
         };
         this._response.set(_message);
+        console.log('end response', this.response());
       }
     } catch (error: unknown) {
       this._error.set(
@@ -82,6 +87,7 @@ export class GeminiAi {
     }
   }
 
+  createMessage() {}
   public clearError(): void {
     this._error.set(null);
   }
