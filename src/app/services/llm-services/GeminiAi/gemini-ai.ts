@@ -13,6 +13,8 @@ import { Chat } from '../../ChatServices/chat';
   providedIn: 'root',
 })
 export class GeminiAi {
+  _chat: Chat = inject(Chat);
+
   options: GoogleGenAIOptions = {
     apiKey: environment.gemini_api_key,
   };
@@ -46,6 +48,7 @@ export class GeminiAi {
     try {
       this._isGenerating.set(true);
 
+      this.getHistory();
       const aiResponse = await this._ai!.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: message,
@@ -72,5 +75,12 @@ export class GeminiAi {
   createMessage() {}
   public clearError(): void {
     this._error.set(null);
+  }
+  private getHistory(): ChatMessage[] {
+    console.log('getting entire history...');
+    const _chatHistory = this._chat.getHistory();
+    console.log("here's the history: ", _chatHistory);
+
+    return _chatHistory;
   }
 }

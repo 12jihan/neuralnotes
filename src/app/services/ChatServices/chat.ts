@@ -63,4 +63,8 @@ export class Chat {
 
     return msg;
   }
+
+  public getHistory(): ChatMessage[] {
+    return this.chatMessages();
+  }
 }
