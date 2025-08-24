@@ -26,11 +26,17 @@
     <div class="chat__messages">
       @for (message of chatMessages(); track message.id) {
         <div class="message" [class]="'message--' + message.sender">
-          <div class="message__content">{{ message.content }}</div>
+          <!-- <div class="message__content">{{ message.content }}</div> -->
+          <div class="message__content">
+            <markdown [data]="message.content"></markdown>
+          </div>
           <div class="message__time">
             {{ message.timestamp | date: "short" }}
           </div>
         </div>
+      }
+      @if (this.gemini.isGenerating()) {
+        <div>Generating Response...</div>
       }
     </div>
     <div class="chat__input">

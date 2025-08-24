@@ -12,6 +12,7 @@ import {
 import { GeminiAi } from '../../services/llm-services/GeminiAi/gemini-ai';
 import { environment } from '../../../../environments/environment';
 import { Chat } from '../../services/ChatServices/chat';
+import { MarkdownComponent } from 'ngx-markdown';
 
 interface ChatMessage {
   id: string;
@@ -22,7 +23,7 @@ interface ChatMessage {
 
 @Component({
   selector: 'app-sidebar-right',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MarkdownComponent],
   templateUrl: './sidebar-right.html',
   styleUrl: './sidebar-right.scss',
 })
