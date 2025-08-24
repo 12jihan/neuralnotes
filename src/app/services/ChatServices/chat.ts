@@ -31,21 +31,36 @@ export class Chat {
 
   async handleMessageSent(input: string): Promise<void> {
     // Add user message
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: input,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-    this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
-      ...messages,
-      userMessage,
-    ]);
+    const userMessage: ChatMessage = this._createMessage('user', input);
     this._message.set(userMessage);
+    if (this.message() != null) {
+      this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+        ...messages,
+        userMessage,
+      ]);
+    }
 
     if (this.message()!.content) {
       await this._gemini.send(this.message()!.content);
-      console.log('test async');
+      let aiResp = this._gemini.response();
+      if (aiResp) {
+        const _resp: ChatMessage = this._createMessage('ai', aiResp);
+        this._chatMessages.update((messages: ChatMessage[]) => [
+          ...messages,
+          _resp,
+        ]);
+      }
     }
+  }
+
+  private _createMessage(sender: 'ai' | 'user', message: string): ChatMessage {
+    const msg: ChatMessage = {
+      id: Date.now().toString(),
+      content: message,
+      sender: sender,
+      timestamp: new Date(),
+    };
+
+    return msg;
   }
 }
