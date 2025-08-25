@@ -1,6 +1,6 @@
 <div class="app__container">
   <!-- Left Sidebar - Notes Navigation -->
-  <app-sidebar-left 
+  <app-sidebar-left
     [notes]="notes()"
     [folders]="folders()"
     [selectedNote]="selectedNote()"
@@ -66,17 +66,16 @@
   <!-- </div> -->
 
   <!-- Main Content - Note Editor -->
-  <app-main-editor 
+  <app-main-editor
     [selectedNote]="selectedNote()"
     [allNotes]="notes()"
     (noteUpdated)="handleNoteUpdated($event)"
   />
 
   <!-- Right Sidebar - AI Chat -->
-  <app-sidebar-right 
-    [chatMessages]="chatMessages()"
-    (messageSent)="handleMessageSent($event)"
-  />
+  <app-sidebar-right />
+  <!-- [chatMessages]="chatMessages()" -->
+  <!-- (messageSent)="handleMessageSent($event)" -->
   <!-- <div class="sidebar sidebar--right" [class.sidebar--collapsed]="rightSidebarCollapsed()"> -->
   <!--   <div class="sidebar__header"> -->
   <!--     <button class="btn btn--collapse" (click)="toggleRightSidebar()"> -->

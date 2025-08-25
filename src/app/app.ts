@@ -268,8 +268,6 @@ export class App {
     this.folders.update((folders) => [...folders, newFolder]);
   }
 
-  // All line editing methods moved to main-editor component
-
   handleMessageSent(input: string) {
     // Add user message
     const userMessage: ChatMessage = {
@@ -279,7 +277,10 @@ export class App {
       timestamp: new Date(),
     };
 
-    this.chatMessages.update((messages) => [...messages, userMessage]);
+    this.chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+      ...messages,
+      userMessage,
+    ]);
 
     // Simulate AI response (replace with actual AI integration later)
     setTimeout(() => {
