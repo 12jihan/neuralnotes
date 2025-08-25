@@ -10,107 +10,12 @@
     (noteMovedToFolder)="moveNoteToFolder($event)"
     (newFolderCreated)="createFolder($event)"
   />
-  <!-- <div -->
-  <!--   class="sidebar sidebar--left" -->
-  <!--   [class.sidebar--collapsed]="leftSidebarCollapsed()" -->
-  <!-- > -->
-  <!--   <div class="sidebar__header"> -->
-  <!--     <h2 class="sidebar__title" *ngIf="!leftSidebarCollapsed()">Notes</h2> -->
-  <!--     <button class="btn btn--collapse" (click)="toggleLeftSidebar()"> -->
-  <!--       <svg -->
-  <!--         viewBox="0 0 24 24" -->
-  <!--         width="16" -->
-  <!--         height="16" -->
-  <!--         [style.transform]=" -->
-  <!--           leftSidebarCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)' -->
-  <!--         " -->
-  <!--       > -->
-  <!--         <path -->
-  <!--           fill="currentColor" -->
-  <!--           d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" -->
-  <!--         /> -->
-  <!--       </svg> -->
-  <!--     </button> -->
-  <!--   </div> -->
-  <!--   <div class="sidebar__content" *ngIf="!leftSidebarCollapsed()"> -->
-  <!--     <div class="search-box"> -->
-  <!--       <input -->
-  <!--         class="input input--search" -->
-  <!--         type="text" -->
-  <!--         placeholder="Search notes..." -->
-  <!--         [(ngModel)]="searchQuery" -->
-  <!--       /> -->
-  <!--     </div> -->
-  <!--     <div class="notes__list"> -->
-  <!--       @for (note of filteredNotes(); track note.id) { -->
-  <!--         <div -->
-  <!--           class="note__item" -->
-  <!--           [class.note__item--active]="selectedNote()?.id === note.id" -->
-  <!--           (click)="selectNote(note)" -->
-  <!--         > -->
-  <!--           <div class="note__title">{{ note.title }}</div> -->
-  <!--           <div class="note__preview">{{ note.preview }}</div> -->
-  <!--           <div class="note__date"> -->
-  <!--             {{ note.lastModified | date: "short" }} -->
-  <!--           </div> -->
-  <!--         </div> -->
-  <!--       } -->
-  <!--     </div> -->
-  <!--     <button class="btn btn--new-note" (click)="createNewNote()"> -->
-  <!--       <svg viewBox="0 0 24 24" width="16" height="16"> -->
-  <!--         <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /> -->
-  <!--       </svg> -->
-  <!--       New Note -->
-  <!--     </button> -->
-  <!--   </div> -->
-  <!-- </div> -->
-
-  <!-- Main Content - Note Editor -->
   <app-main-editor
     [selectedNote]="selectedNote()"
     [allNotes]="notes()"
     (noteUpdated)="handleNoteUpdated($event)"
   />
-
-  <!-- Right Sidebar - AI Chat -->
   <app-sidebar-right />
-  <!-- [chatMessages]="chatMessages()" -->
-  <!-- (messageSent)="handleMessageSent($event)" -->
-  <!-- <div class="sidebar sidebar--right" [class.sidebar--collapsed]="rightSidebarCollapsed()"> -->
-  <!--   <div class="sidebar__header"> -->
-  <!--     <button class="btn btn--collapse" (click)="toggleRightSidebar()"> -->
-  <!--       <svg viewBox="0 0 24 24" width="16" height="16" [style.transform]="rightSidebarCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)'"> -->
-  <!--         <path fill="currentColor" d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/> -->
-  <!--       </svg> -->
-  <!--     </button> -->
-  <!--     <h2 class="sidebar__title" *ngIf="!rightSidebarCollapsed()">AI Assistant</h2> -->
-  <!--   </div> -->
-  <!--   <div class="sidebar__content" *ngIf="!rightSidebarCollapsed()"> -->
-  <!--     <div class="chat__messages"> -->
-  <!--       @for (message of chatMessages(); track message.id) { -->
-  <!--         <div class="message" [class]="'message--' + message.sender"> -->
-  <!--           <div class="message__content">{{ message.content }}</div> -->
-  <!--           <div class="message__time">{{ message.timestamp | date:'short' }}</div> -->
-  <!--         </div> -->
-  <!--       } -->
-  <!--     </div> -->
-  <!--     <div class="chat__input"> -->
-  <!--       <textarea  -->
-  <!--         class="textarea textarea--chat" -->
-  <!--         [(ngModel)]="chatInput"  -->
-  <!--         placeholder="Ask AI about your notes..." -->
-  <!--         (keydown.enter)="sendMessage($event)"></textarea> -->
-  <!--       <button class="btn btn--send"  -->
-  <!--               [class.btn--send--disabled]="!chatInput().trim()" -->
-  <!--               (click)="sendMessage()"  -->
-  <!--               [disabled]="!chatInput().trim()"> -->
-  <!--         <svg viewBox="0 0 24 24" width="16" height="16"> -->
-  <!--           <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/> -->
-  <!--         </svg> -->
-  <!--       </button> -->
-  <!--     </div> -->
-  <!--   </div> -->
-  <!-- </div> -->
 </div>
 
 <router-outlet />
