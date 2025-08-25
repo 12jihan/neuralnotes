@@ -78,6 +78,29 @@ export class Chat {
     }
   }
 
+  public async handleMessageStream(input: string): Promise<void> {
+    const userMessage: ChatMessage = this._createMessage('user', input);
+    this._message.set(userMessage);
+
+    this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+      ...messages,
+      userMessage,
+    ]);
+
+    // Create AI message placeholder
+    const aiMessageId = Date.now().toString();
+    const aiMessage: ChatMessage = this._createMessage('model', '');
+    aiMessage.id = aiMessageId;
+
+    this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+      ...messages,
+      aiMessage,
+    ]);
+
+    // Start streaming
+    await this._gemini.sendPromptStream(input);
+  }
+
   public getHistory(): ChatMessage[] {
     return this.chatMessages();
   }

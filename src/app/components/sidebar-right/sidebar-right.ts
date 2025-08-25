@@ -65,11 +65,26 @@ export class SidebarRight {
     this.chat.handleMessageZeroShot(input);
   }
 
-  sendMessageMultiTurn(): void {
+  async sendMessageMultiTurn(): Promise<void> {
     const input = this.chatInput().trim();
     if (!input) return;
 
     this.chatInput.set('');
     this.chat.handleMessageMultiTurn(input);
+  }
+
+  async sendMessageStream(event?: KeyboardEvent | Event): Promise<void> {
+    if (event && event instanceof KeyboardEvent && !event.ctrlKey) {
+      event.preventDefault();
+      return;
+    }
+
+    const input = this.chatInput().trim();
+    if (!input) return;
+
+    this.chatInput.set('');
+
+    // Use the new streaming method
+    await this.chat.handleMessageStream(input);
   }
 }

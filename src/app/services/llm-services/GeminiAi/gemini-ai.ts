@@ -120,16 +120,48 @@ export class GeminiAi {
   }
 
   async sendPromptStream(message: string): Promise<any> {
-    if (!message.trim()) throw new Error('There was a problem with the llm');
-    this._ai?.chats.create({
-      model: 'gemini-2.0-flash',
-      history: [],
-      config: {
-        thinkingConfig: {
-          thinkingBudget: 0, // Disables thinking
-        },
-      },
-    });
+    if (!message.trim()) throw new Error('Message cannot be empty...');
+    if (!this._ai) throw new Error('Gemini AI service not initialized...');
+
+    this._error.set(null);
+    this._isGenerating.set(true);
+
+    // Clear previous response
+    this._response.set('');
+    try {
+      let stream: AsyncGenerator<GenerateContentResponse>;
+      if (this._chat) {
+        // Use existing chat for multi-turn conversation
+        stream = await this._chat.sendMessageStream({
+          message: message,
+        });
+      } else {
+        throw new Error('Ai is not properly initialized...');
+      }
+
+      // Process the stream
+      for await (const chunk of stream!) {
+        const chunkText = chunk.text;
+        if (chunkText) {
+          console.log('Chunk received:', chunkText);
+          console.log('_'.repeat(80));
+
+          // Accumulate the response by appending each chunk
+          this._response.update(
+            (currentResponse) => (currentResponse || '') + chunkText,
+          );
+        }
+      }
+
+      console.log('Stream complete. Final response:', this._response());
+    } catch (error: unknown) {
+      console.error('Streaming error:', error);
+      this._error.set(
+        'The AI was unable to respond properly. Please try again later...',
+      );
+    } finally {
+      this._isGenerating.set(false);
+    }
   }
 
   public clearError(): void {
