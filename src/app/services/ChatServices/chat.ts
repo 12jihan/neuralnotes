@@ -21,7 +21,7 @@ export class Chat {
       id: (Date.now() + 1).toString(),
       content:
         "Hello! I'm your AI assistant. I can help you with your notes, answer questions, and provide insights.",
-      sender: 'ai',
+      sender: 'model',
       timestamp: new Date(),
     },
   ]);
@@ -29,7 +29,7 @@ export class Chat {
   public message: Signal<ChatMessage | null> = this._message.asReadonly();
   public chatMessages: Signal<ChatMessage[]> = this._chatMessages.asReadonly();
 
-  async handleMessageSent(input: string): Promise<void> {
+  public async handleMessageZeroShot(input: string): Promise<void> {
     // Add user message
     const userMessage: ChatMessage = this._createMessage('user', input);
     this._message.set(userMessage);
@@ -41,11 +41,11 @@ export class Chat {
     }
 
     if (this.message()!.content) {
-      await this._gemini.send(this.message()!.content);
+      await this._gemini.sendPromptZeroShot(this.message()!.content);
       let aiResp = this._gemini.response();
       if (aiResp) {
-        const _resp: ChatMessage = this._createMessage('ai', aiResp);
-        this._chatMessages.update((messages: ChatMessage[]) => [
+        const _resp: ChatMessage = this._createMessage('model', aiResp);
+        this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
           ...messages,
           _resp,
         ]);
@@ -53,7 +53,39 @@ export class Chat {
     }
   }
 
-  private _createMessage(sender: 'ai' | 'user', message: string): ChatMessage {
+  public async handleMessageMultiTurn(input: string): Promise<void> {
+    const userMessage: ChatMessage = this._createMessage('user', input);
+    this._message.set(userMessage);
+
+    if (this.message() != null) {
+      this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+        ...messages,
+        userMessage,
+      ]);
+    }
+
+    if (this.message()!.content) {
+      await this._gemini.sendPromptMultiTurn(input);
+
+      const aiResp = this._gemini.response();
+      if (aiResp) {
+        const _resp: ChatMessage = this._createMessage('model', aiResp);
+        this._chatMessages.update((messages: ChatMessage[]): ChatMessage[] => [
+          ...messages,
+          _resp,
+        ]);
+      }
+    }
+  }
+
+  public getHistory(): ChatMessage[] {
+    return this.chatMessages();
+  }
+
+  private _createMessage(
+    sender: ChatMessage['sender'],
+    message: string,
+  ): ChatMessage {
     const msg: ChatMessage = {
       id: Date.now().toString(),
       content: message,
@@ -62,9 +94,5 @@ export class Chat {
     };
 
     return msg;
-  }
-
-  public getHistory(): ChatMessage[] {
-    return this.chatMessages();
   }
 }

@@ -51,7 +51,7 @@ export class SidebarRight {
   constructor() {
     console.log(this.chat.chatMessages());
   }
-  async sendMessage(event?: KeyboardEvent | Event): Promise<void> {
+  async sendMessageZeroShot(event?: KeyboardEvent | Event): Promise<void> {
     // TODO: Forgot what this does. Double check later and figure out what's going on here.
     if (event && event instanceof KeyboardEvent && !event.ctrlKey) {
       event.preventDefault();
@@ -62,9 +62,14 @@ export class SidebarRight {
     if (!input) return;
 
     this.chatInput.set('');
-    this.chat.handleMessageSent(input);
+    this.chat.handleMessageZeroShot(input);
+  }
 
-    // This was used to handle the message with the output() binding to a function in the parent component.
-    // this.messageSent.emit(input);
+  sendMessageMultiTurn(): void {
+    const input = this.chatInput().trim();
+    if (!input) return;
+
+    this.chatInput.set('');
+    this.chat.handleMessageMultiTurn(input);
   }
 }
