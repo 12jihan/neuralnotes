@@ -1,21 +1,21 @@
-<div class="app__container">
-  <!-- Left Sidebar - Notes Navigation -->
-  <app-sidebar-left
-    [notes]="notes()"
-    [folders]="folders()"
-    [selectedNote]="selectedNote()"
-    (noteSelected)="selectNote($event)"
-    (newNoteCreated)="createNewNote()"
-    (folderToggled)="toggleFolder($event)"
-    (noteMovedToFolder)="moveNoteToFolder($event)"
-    (newFolderCreated)="createFolder($event)"
-  />
-  <app-main-editor
-    [selectedNote]="selectedNote()"
-    [allNotes]="notes()"
-    (noteUpdated)="handleNoteUpdated($event)"
-  />
-  <app-sidebar-right />
-</div>
+<!-- <div class="app__container"> -->
+<!--   <!-- Left Sidebar - Notes Navigation -->
+<!--   <app-sidebar-left -->
+<!--     [notes]="notes()" -->
+<!--     [folders]="folders()" -->
+<!--     [selectedNote]="selectedNote()" -->
+<!--     (noteSelected)="selectNote($event)" -->
+<!--     (newNoteCreated)="createNewNote()" -->
+<!--     (folderToggled)="toggleFolder($event)" -->
+<!--     (noteMovedToFolder)="moveNoteToFolder($event)" -->
+<!--     (newFolderCreated)="createFolder($event)" -->
+<!--   /> -->
+<!--   <app-main-editor -->
+<!--     [selectedNote]="selectedNote()" -->
+<!--     [allNotes]="notes()" -->
+<!--     (noteUpdated)="handleNoteUpdated($event)" -->
+<!--   /> -->
+<!--   <app-sidebar-right /> -->
+<!-- </div> -->
 
 <router-outlet />

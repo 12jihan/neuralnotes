@@ -1,53 +1,16 @@
-import { Component, signal, computed, WritableSignal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Component, signal, WritableSignal } from '@angular/core';
+import { SidebarLeft } from '../../components/sidebar-left/sidebar-left';
+import { SidebarRight } from '../../components/sidebar-right/sidebar-right';
+import { MainEditor } from '../../components/main-editor/main-editor';
 import { DomSanitizer } from '@angular/platform-browser';
 
-import { SidebarRight } from './components/sidebar-right/sidebar-right';
-import { SidebarLeft } from './components/sidebar-left/sidebar-left';
-import { MainEditor } from './components/main-editor/main-editor';
-
-interface Folder {
-  id: string;
-  name: string;
-  color: string;
-  isExpanded: boolean;
-  createdAt: Date;
-}
-
-interface Note {
-  id: string;
-  title: string;
-  content: string; // Keep for compatibility
-  lines: string[]; // New line-based structure
-  preview: string;
-  lastModified: Date;
-  folderId?: string; // Optional folder assignment
-  tags: string[]; // Tags for categorization
-}
-
-interface ChatMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
 @Component({
-  selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    FormsModule,
-    CommonModule,
-    // SidebarRight,
-    // SidebarLeft,
-    // MainEditor,
-  ],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  selector: 'app-notes',
+  imports: [SidebarLeft, SidebarRight, MainEditor],
+  templateUrl: './notes.html',
+  styleUrl: './notes.scss',
 })
-export class App {
+export class Notes {
   protected readonly title = signal('neuralnotes');
 
   // Sidebar collapse states (now managed by individual components)
@@ -161,7 +124,7 @@ export class App {
       id: '1',
       content:
         "Hello! I'm your AI assistant. I can help you with your notes, answer questions, and provide insights.",
-      sender: 'ai',
+      sender: 'model',
       timestamp: new Date(),
     },
   ]);
@@ -287,7 +250,7 @@ export class App {
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         content: this.generateAIResponse(input),
-        sender: 'ai',
+        sender: 'model',
         timestamp: new Date(),
       };
 
