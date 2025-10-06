@@ -1,10 +1,10 @@
-# Neural Notes 🧠
+# Neural Notes
 
-**⚠️ ALPHA VERSION - This application is in early development and may contain bugs or incomplete features.**
+**ALPHA VERSION - This application is in early development and may contain bugs or incomplete features.**
 
 A powerful note-taking application, built with Angular. Features a modern three-panel layout with advanced markdown support, folder organization, tagging system, and AI assistance for optimal productivity.
 
-## ✨ Features
+##Features
 
 ### Core Note-Taking
 - **Live Markdown Editing**: Real-time markdown rendering with syntax highlighting
@@ -30,7 +30,7 @@ A powerful note-taking application, built with Angular. Features a modern three-
 - **Chat Assistant**: Built-in AI helper for note management and insights
 - **Smart Suggestions**: Get help organizing and connecting your thoughts
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -113,7 +113,7 @@ This application is currently in **alpha development**. Please be aware that:
 
 **Important**: Don't rely on this version for critical note-taking without external backups.
 
-## 🔮 Planned Features
+## Planned Features
 
 - [ ] Data persistence (local storage and cloud sync)
 - [ ] Real AI integration with advanced capabilities
@@ -124,7 +124,7 @@ This application is currently in **alpha development**. Please be aware that:
 - [ ] Plugin system for extensibility
 - [ ] Mobile app versions
 
-## 🛠 Technology Stack
+## Technology Stack
 
 - **Frontend**: Angular 18 with standalone components
 - **State Management**: Angular Signals for reactive updates  
@@ -133,7 +133,7 @@ This application is currently in **alpha development**. Please be aware that:
 - **Drag & Drop**: HTML5 Drag and Drop API
 - **Icons**: Inline SVG icons for performance
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -150,7 +150,7 @@ src/
 │   └── utils/            # Utility classes and mixins
 ```
 
-## 🐛 Found a Bug?
+## Found a Bug?
 
 Since this is an alpha version, bugs are expected! If you encounter issues:
 
@@ -164,6 +164,6 @@ This project is in active development. License details will be provided in futur
 
 ---
 
-**Happy note-taking! 📝✨**
+**Happy note-taking!**
 
-*Built with ❤️ using Angular 18 and modern web technologies*
+*Built with ❤️ using Angular 20 and modern web technologies*
