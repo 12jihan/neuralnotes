@@ -61,7 +61,7 @@ A powerful note-taking application, built with Angular. Features a modern three-
 
 The application will automatically reload whenever you modify any of the source files.
 
-## 📝 How to Use
+## How to Use
 
 ### Creating & Editing Notes
 1. Click "New Note" in the left sidebar to create a note
@@ -158,7 +158,7 @@ Since this is an alpha version, bugs are expected! If you encounter issues:
 2. Check browser console for any error messages
 3. Note the steps to reproduce the issue for future reporting
 
-## 📄 License
+## License
 
 This project is in active development. License details will be provided in future releases.
 
